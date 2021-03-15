@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="plagiarism/drillbit/db" VERSION="20150401" COMMENT="XMLDB file for Moodle plagiarism/Drillbit plugin" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+   <TABLES>
+   <TABLE NAME="plagiarism_drillbit_files" COMMENT="info about submitted files" NEXT="drillbit_plugin_config">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="cm"/>
+                <FIELD NAME="cm" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="cm" NEXT="submitter"/>
+                <FIELD NAME="submitter" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="userid" NEXT="identifier"/>
+                <FIELD NAME="identifier" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="submitter" NEXT="submissionid"/>
+                <FIELD NAME="submissionid" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="identifier" NEXT="itemid"/>
+                <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="submissionid" NEXT="statuscode"/>
+                <FIELD NAME="statuscode" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false" PREVIOUS="itemid" NEXT="similarityscore"/>
+                <FIELD NAME="similarityscore" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="statuscode" NEXT="dkey"/>
+                <FIELD NAME="dkey" TYPE="char" LENGTH="64" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="similarityscore" NEXT="attempt"/>
+                <FIELD NAME="attempt" TYPE="int" LENGTH="5" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="similarityscore" NEXT="lastmodified"/>
+                <FIELD NAME="lastmodified" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="attempt" NEXT="grade"/>
+                <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="lastmodified" NEXT="submissiontype"/>
+                <FIELD NAME="submissiontype" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" PREVIOUS="grade" NEXT="errorcode" />
+                <FIELD NAME="errorcode" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" PREVIOUS="submissiontype" NEXT="errormsg"/>
+                <FIELD NAME="errormsg" TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" PREVIOUS="errorcode" NEXT="student_read"/>
+                <FIELD NAME="student_read" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" PREVIOUS="errormsg" NEXT="callback_url"/>
+                <FIELD NAME="callback_url" TYPE="text" LENGTH="10" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" PREVIOUS="student_read" NEXT="download_url"/>
+                <FIELD NAME="download_url" TYPE="text" LENGTH="10" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" PREVIOUS="callback_url"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="cm"/>
+                <KEY NAME="cm" TYPE="foreign" FIELDS="cm" REFTABLE="course_modules" REFFIELDS="id" ONDELETE="cascade" PREVIOUS="primary" NEXT="userid"/>
+                <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" ONDELETE="cascade" PREVIOUS="cm"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="submissionid" UNIQUE="false" FIELDS="submissionid" />
+            </INDEXES>
+        </TABLE>
+      <TABLE NAME="drillbit_account_config" COMMENT="Plagiarism Plugin Account Information" NEXT="drillbit_plugin_config">
+         <FIELDS>
+            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="true" NEXT="email_id" />
+            <FIELD NAME="email_id" TYPE="char" LENGTH="350" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="password" />
+            <FIELD NAME="password" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" PREVIOUS="email_id" NEXT="folder_id" />
+            <FIELD NAME="folder_id" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" DEFAULT="NULL" PREVIOUS="password" NEXT="api_key" />
+            <FIELD NAME="api_key" TYPE="char" LENGTH="256" NOTNULL="false" SEQUENCE="false" PREVIOUS="folder_id" NEXT="api_url" />
+            <FIELD NAME="api_url" TYPE="char" LENGTH="1024" NOTNULL="false" SEQUENCE="false" DEFAULT="NULL" PREVIOUS="api_key" />
+         </FIELDS>
+         <KEYS>
+            <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+         </KEYS>
+      </TABLE>
+      <TABLE NAME="drillbit_plugin_config" COMMENT="info about plugin config" PREVIOUS="drillbit_account_config">
+         <FIELDS>
+            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="cm" />
+            <FIELD NAME="cm" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" PREVIOUS="id" NEXT="name" />
+            <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="cm" NEXT="value" />
+            <FIELD NAME="value" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="config_hash" />
+            <FIELD NAME="config_hash" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="value" />
+         </FIELDS>
+         <KEYS>
+            <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="cm" />
+            <!-- <KEY NAME="cm" TYPE="foreign" FIELDS="cm" REFTABLE="course_modules" REFFIELDS="id" ONDELETE="cascade" PREVIOUS="primary"/> -->
+         </KEYS>
+      </TABLE>
+   </TABLES>
+</XMLDB>

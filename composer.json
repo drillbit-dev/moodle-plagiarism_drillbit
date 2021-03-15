@@ -1,0 +1,6 @@
+{
+    "name": "drillbit/moodle-plagiarism_drillbit",
+    "require": {
+        "kelvinmo/simplejwt": "^0.5.1"
+    }
+}

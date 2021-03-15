@@ -1,0 +1,34 @@
+{
+    "name": "kelvinmo/simplejwt",
+    "description": "A simple JSON Web Token library for PHP.",
+    "keywords": [ "jwt", "jwe", "jose" ],
+    "homepage": "https://github.com/kelvinmo/simplejwt",
+    "require": {
+        "php": "^5.4 || ^7.1 || ^8.0",
+        "ext-openssl": "*",
+        "ext-hash": "*",
+        "symfony/console": "~2.8 || ^4.0 || ^5.0"
+    },
+    "require-dev": {
+        "ext-bz2": "*",
+        "ext-Phar": "*",
+        "phpunit/phpunit": "^4.8.35 || ^6.0 || ^9.3",
+        "phing/phing": "^2.0"
+    },
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Kelvin Mo",
+            "email": "kmo@users.sourceforge.net"
+        }
+    ],
+    "bin": [ "bin/jwkstool" ],
+    "autoload": {
+        "psr-4": { "SimpleJWT\\": "src/SimpleJWT" }
+    },
+    "scripts": {
+        "phar": [ "@composer install", "phing phar" ],
+        "test": [ "@composer install", "phpunit" ],
+        "update-copyright": [ "@composer install", "phing update-copyright" ]
+    }
+}
