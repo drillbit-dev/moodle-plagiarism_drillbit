@@ -26,9 +26,11 @@ error_reporting(E_ALL);
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
-$paper_id = isset($_REQUEST["paper_id"]) ? $_REQUEST["paper_id"] : null;
+require_login();
 
-if (isset($paper_id) && $paper_id > 0) {
+$paper_id = !empty($_REQUEST["paper_id"]) ? $_REQUEST["paper_id"] : null;
+
+if ($paper_id != null) {
     $result_code = update_expired_jwt_token();
     if ($result_code) {
         global $DB;
