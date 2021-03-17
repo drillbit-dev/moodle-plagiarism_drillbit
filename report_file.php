@@ -28,7 +28,7 @@ require_once(__DIR__ . '/lib.php');
 
 require_login();
 
-$paper_id = !empty($_REQUEST["paper_id"]) ? $_REQUEST["paper_id"] : null;
+$paper_id = required_param('method', PARAM_ALPHAEXT);
 
 if ($paper_id != null) {
     $result_code = update_expired_jwt_token();

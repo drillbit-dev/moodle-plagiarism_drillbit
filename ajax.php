@@ -29,7 +29,8 @@ require_once(__DIR__ . '/lib.php');
 
 require_login();
 
-$method = isset($_REQUEST["method"]) ? $_REQUEST["method"] : "";
+$method = required_param('method', PARAM_ALPHAEXT);
+
 header("Content-Type: application/json; charset=UTF-8");
 
 if ($method === "external") {
