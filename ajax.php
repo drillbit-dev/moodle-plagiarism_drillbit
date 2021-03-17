@@ -30,12 +30,14 @@ require_once(__DIR__ . '/lib.php');
 require_login();
 
 $method = required_param('method', PARAM_ALPHAEXT);
+$url = required_param("url", PARAM_RAW);
+$data = required_param("data", PARAM_RAW);
 
 header("Content-Type: application/json; charset=UTF-8");
 
 if ($method === "external") {
-    $dataToPost = isset($_POST["data"]) ? $_POST["data"] : null;
-    $URL = isset($_REQUEST["url"]) ? $_REQUEST["url"] : null;
+    $dataToPost = $data;
+    $URL = $url;
     if ($dataToPost) {
         $result = CallExternalAPI("POST", $URL, $dataToPost, array("content-type:application/json"));
         // $decodedResult = json_decode($result);
@@ -53,4 +55,3 @@ if ($method === "external") {
 // } else if ($method == "update_submission") {
 //     plagiarism_drillbit_update_reports();
 // } 
-
