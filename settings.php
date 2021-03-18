@@ -19,15 +19,15 @@
  * @copyright 2012 iParadigms LLC
  */
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/plagiarismlib.php');
 require_once($CFG->dirroot . '/plagiarism/drillbit/lib.php');
 require_once($CFG->dirroot . '/plagiarism/drillbit/classes/forms/drillbit_setup_form.class.php');
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 $PAGE->requires->jquery();
 require_login();
@@ -38,18 +38,18 @@ global $DB;
 
 $PAGE->set_url(new moodle_url('/plagiarism/drillbit/settings.php'));
 $PAGE->set_context($context);
-$pageTitle = "Drillbit Plagiarism Settings";
-$PAGE->set_title($pageTitle);
+$pagetitle = "Drillbit Plagiarism Settings";
+$PAGE->set_title($pagetitle);
 
-$settingsForm = new drillbit_setup_form();
+$settingsform = new drillbit_setup_form();
 
-//$settingsForm->display();
+// $settingsform->display();
 
-if ($settingsForm->is_cancelled()) {
+if ($settingsform->is_cancelled()) {
     redirect($CFG->wwwroot . '/admin/category.php?category=plagiarism', 'No changes Done.');
-} else if ($settingsFormData = $settingsForm->get_data()) {
+} else if ($settingsformdata = $settingsform->get_data()) {
 
-    foreach ($settingsFormData as $field => $value) {
+    foreach ($settingsformdata as $field => $value) {
         $DB->delete_records("config_plugins", array("name" => $field));
     }
 
@@ -58,10 +58,10 @@ if ($settingsForm->is_cancelled()) {
 
     $email = "";
     $pass = "";
-    $api_key = "";
-    $folder_id = "";
+    $apikey = "";
+    $folderid = "";
 
-    foreach ($settingsFormData as $field => $value) {
+    foreach ($settingsformdata as $field => $value) {
         $drillbitconfigfield = new stdClass();
         $drillbitconfigfield->value = $value;
         $drillbitconfigfield->plugin = 'plagiarism_drillbit';
@@ -75,11 +75,11 @@ if ($settingsForm->is_cancelled()) {
             $pass = $value;
         }
         if ($field == "plagiarism_drillbit_folderid") {
-            $folder_id = $value;
+            $folderid = $value;
         }
 
         if ($field == "plagiarism_drillbit_apikey") {
-            $api_key = $value;
+            $apikey = $value;
         }
 
         if (!$DB->insert_record('config_plugins', $drillbitconfigfield)) {
@@ -87,7 +87,7 @@ if ($settingsForm->is_cancelled()) {
         }
     }
 
-    $jwt = get_login_token($email, $pass, $folder_id, $api_key);
+    $jwt = get_login_token($email, $pass, $folderid, $apikey);
 
     $drillbitconfigfield = new stdClass();
     $drillbitconfigfield->value = $jwt;
@@ -110,13 +110,13 @@ if ($settingsForm->is_cancelled()) {
     $output = $OUTPUT->notification(get_string('configsavesuccess', 'plagiarism_drillbit'), 'notifysuccess');
 }
 
-$plagiarism_drillbit_settings = (array)get_config('plagiarism_drillbit');
-// print_r($plagiarism_drillbit_settings);exit;
-$settingsForm->set_data($plagiarism_drillbit_settings);
+$plagiarismdrillbitsettings = (array)get_config('plagiarism_drillbit');
+// print_r($plagiarismdrillbitsettings);exit;
+$settingsform->set_data($plagiarismdrillbitsettings);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading($pageTitle);
-$settingsForm->display();
+echo $OUTPUT->heading($pagetitle);
+$settingsform->display();
 
 ?>
 <script>

@@ -34,8 +34,6 @@ class drillbit_setup_form extends moodleform {
     public function definition() {
         global $DB, $CFG;
 
-        //$config = plagiarism_plugin_turnitin::plagiarism_drillbit_admin_config();
-
         $mform = $this->_form;
 
         $mform->disable_form_change_checker();
@@ -88,27 +86,20 @@ class drillbit_setup_form extends moodleform {
         $mform->addElement('button', 'connection_test', get_string("connecttest", 'plagiarism_drillbit'));
 
         $mform->addElement('html', '<div id="api_conn_result" class="api_conn_result"></div>');
-        
         $mform->addElement('header', 'plagiarism_drillbit_plugin_default_settings', get_string('drillbitplugindefaultsettings', 'plagiarism_drillbit'));
         $mform->setExpanded('plagiarism_drillbit_plugin_default_settings');
-
         $options = array(0 => get_string('no', 'plagiarism_drillbit'), 1 => get_string('yes', 'plagiarism_drillbit'));
-        
-        $excludeReferencesSelect = $mform->addElement('select', 'plagiarism_exclude_references', get_string("excludereferences", "plagiarism_drillbit"), $options);
-        $excludeReferencesSelect->setSelected('0');
+        $excludereferencesselect = $mform->addElement('select', 'plagiarism_exclude_references', get_string("excludereferences", "plagiarism_drillbit"), $options);
+        $excludereferencesselect->setSelected('0');
+        $excludequotesselect = $mform->addElement('select', 'plagiarism_exclude_quotes', get_string("excludequotes", "plagiarism_drillbit"), $options);
+        $excludequotesselect->setSelected('1');
 
-        $excludeQuotesSelect = $mform->addElement('select', 'plagiarism_exclude_quotes', get_string("excludequotes", "plagiarism_drillbit"), $options);
-        $excludeQuotesSelect->setSelected('1');
-
-        $excludeSmallSources = $mform->addElement('select', 'plagiarism_exclude_smallsources', get_string("excludesmallsources", "plagiarism_drillbit"), $options);
-        $excludeSmallSources->setSelected('0');
-
-        
-
+        $excludesmallsources = $mform->addElement('select', 'plagiarism_exclude_smallsources', get_string("excludesmallsources", "plagiarism_drillbit"), $options);
+        $excludesmallsources->setSelected('0');
         $this->add_action_buttons();
     }
 
-    function validation($data, $files) {
+    public function validation($data, $files) {
         return array();
     }
 }

@@ -18,33 +18,32 @@
  * @package   plagiarism_drillbit
  * @copyright 2012 iParadigms LLC
  */
+require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/lib.php');
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-require_once(__DIR__ . '/../../config.php');
-require_once(__DIR__ . '/lib.php');
-
 require_login();
 
-$paper_id = required_param('method', PARAM_ALPHAEXT);
+$paperid = required_param('paper_id', PARAM_INT);
 
-if ($paper_id != null) {
-    $result_code = update_expired_jwt_token();
-    if ($result_code) {
+if ($paperid != null) {
+    $resultcode = update_expired_jwt_token();
+    if ($resultcode) {
         global $DB;
-        $drillbit_file = $DB->get_record("plagiarism_drillbit_files", array("submissionid" => $paper_id));
-        if ($drillbit_file) {
+        $drillbitfile = $DB->get_record("plagiarism_drillbit_files", array("submissionid" => $paperid));
+        if ($drillbitfile) {
             $jwt = get_existing_jwt_token();
             $headers = array(
                 "Authorization: Bearer $jwt"
             );
 
-            $response = CallExternalAPI("GET", $drillbit_file->download_url, false, $headers);
+            $response = CallExternalAPI("GET", $drillbitfile->download_url, false, $headers);
             header('Content-Description: File Transfer');
             header('Content-Type: application/pdf');
-            header('Content-Disposition: inline; filename=' . $paper_id . '_' . microtime() . '.pdf');
+            header('Content-Disposition: inline; filename=' . $paperid . '_' . microtime() . '.pdf');
             header('Content-Transfer-Encoding: binary');
             header('Expires: 0');
             header('Cache-Control: must-revalidate, post-check=0, pre-check=0');

@@ -18,6 +18,9 @@
  * @package   plagiarism_drillbit
  * @copyright 2012 iParadigms LLC
  */
+if (!defined('MOODLE_INTERNAL')) {
+    die('Direct access to this script is forbidden.'); // It must be included from a Moodle page.
+}
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -36,10 +39,10 @@ $data = required_param("data", PARAM_RAW);
 header("Content-Type: application/json; charset=UTF-8");
 
 if ($method === "external") {
-    $dataToPost = $data;
-    $URL = "https://www.drillbitplagiarismcheck.com/drillbit_new/api/authenticate";
-    if ($dataToPost) {
-        $result = CallExternalAPI("POST", $URL, $dataToPost, array("content-type:application/json"));
+    $datatopost = $data;
+    $url = "https://www.drillbitplagiarismcheck.com/drillbit_new/api/authenticate";
+    if ($datatopost) {
+        $result = CallExternalAPI("POST", $url, $datatopost, array("content-type:application/json"));
         // $decodedResult = json_decode($result);
         echo $result;
     }
@@ -51,7 +54,7 @@ if ($method === "external") {
 }
 
 // else if ($method == "submission") {
-//     plagiarism_drillbit_send_queued_submissions();
+// plagiarism_drillbit_send_queued_submissions();
 // } else if ($method == "update_submission") {
-//     plagiarism_drillbit_update_reports();
-// } 
+// plagiarism_drillbit_update_reports();
+// }

@@ -21,8 +21,7 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 require_once($CFG->dirroot.'/plagiarism/drillbit/lib.php');
-
-class drillbit_view { 
+class drillbit_view{
 
     public function output_header($url, $title = '', $heading = '', $return = false) {
         global $PAGE, $OUTPUT;
@@ -44,15 +43,14 @@ class drillbit_view {
             $mform->setExpanded('plagiarism_drillbit_plugin_default_settings');
 
             $options = array(0 => get_string('no', 'plagiarism_drillbit'), 1 => get_string('yes', 'plagiarism_drillbit'));
-            
-            $excludeReferencesSelect = $mform->addElement('select', 'plagiarism_exclude_references', get_string("excludereferences", "plagiarism_drillbit"), $options);
-            $excludeReferencesSelect->setSelected('0');
+            $excludereferencesselect = $mform->addElement('select', 'plagiarism_exclude_references', get_string("excludereferences", "plagiarism_drillbit"), $options);
+            $excludereferencesselect->setSelected('0');
 
-            $excludeQuotesSelect = $mform->addElement('select', 'plagiarism_exclude_quotes', get_string("excludequotes", "plagiarism_drillbit"), $options);
-            $excludeQuotesSelect->setSelected('1');
+            $excludequotesselect = $mform->addElement('select', 'plagiarism_exclude_quotes', get_string("excludequotes", "plagiarism_drillbit"), $options);
+            $excludequotesselect->setSelected('1');
 
-            $excludeSmallSources = $mform->addElement('select', 'plagiarism_exclude_smallsources', get_string("excludesmallsources", "plagiarism_drillbit"), $options);
-            $excludeSmallSources->setSelected('0');
+            $excludesmallsources = $mform->addElement('select', 'plagiarism_exclude_smallsources', get_string("excludesmallsources", "plagiarism_drillbit"), $options);
+            $excludesmallsources->setSelected('0');
         }
     }
 }
