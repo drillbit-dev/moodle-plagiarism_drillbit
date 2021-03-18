@@ -37,7 +37,7 @@ header("Content-Type: application/json; charset=UTF-8");
 
 if ($method === "external") {
     $dataToPost = $data;
-    $URL = $url;
+    $URL = "https://www.drillbitplagiarismcheck.com/drillbit_new/api/authenticate";
     if ($dataToPost) {
         $result = CallExternalAPI("POST", $URL, $dataToPost, array("content-type:application/json"));
         // $decodedResult = json_decode($result);

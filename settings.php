@@ -140,8 +140,7 @@ $settingsForm->display();
             //dataType: 'json',
             //contentType: 'application/json',
             data: {
-                data: formDataJson,
-                url: apiBaseUrl + "/drillbit_new/api/authenticate"
+                data: formDataJson
             },
             success: function(data) {
                 if (data["jwt"]) {
