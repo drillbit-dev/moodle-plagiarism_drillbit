@@ -43,7 +43,6 @@ if ($method === "external") {
     $url = "https://www.drillbitplagiarismcheck.com/drillbit_new/api/authenticate";
     if ($datatopost) {
         $result = CallExternalAPI("POST", $url, $datatopost, array("content-type:application/json"));
-        // $decodedResult = json_decode($result);
         echo $result;
     }
 } else {
@@ -52,9 +51,3 @@ if ($method === "external") {
     $status["message"] = "No method specified";
     echo json_encode($status);
 }
-
-// else if ($method == "submission") {
-// plagiarism_drillbit_send_queued_submissions();
-// } else if ($method == "update_submission") {
-// plagiarism_drillbit_update_reports();
-// }

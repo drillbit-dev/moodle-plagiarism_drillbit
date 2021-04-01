@@ -19,7 +19,9 @@
  * @copyright 2012 iParadigms LLC
  */
 
-$plugin->version = 2021031500;
+defined('MOODLE_INTERNAL') || die();
+
+$plugin->version = 2021032600;
 $plugin->release = "3.5+";
 $plugin->requires = 2018051700;
 $plugin->component = 'plagiarism_drillbit';

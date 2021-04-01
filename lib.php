@@ -40,7 +40,7 @@ define('PLAGIARISM_DRILLBIT_MAX_FILE_UPLOAD_SIZE', 104857600);
 
 
 // Get helper methods.
-// require_once($CFG->dirroot.'/plagiarism/drillbit/locallib.php');
+// require_once($CFG->dirroot.'/plagiarism/drillbit/locallib.php').
 
 class plagiarism_plugin_drillbit extends plagiarism_plugin
 {
@@ -135,7 +135,6 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         global $CFG, $DB, $OUTPUT, $USER;
 
         $output = "";
-        // return $output;
 
         // Don't show links for certain file types as they won't have been submitted to drillbit.
         if (!empty($linkarray["file"])) {
@@ -176,8 +175,6 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
 
         if ((!empty($linkarray["file"]) || !empty($linkarray["content"])) && !empty($linkarray["cmid"])) {
 
-            // $this->load_page_components();
-
             $identifier = '';
             $itemid = 0;
 
@@ -195,8 +192,6 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                 } else if ($cm->modname == 'quiz') {
                     $submissiontype = 'quiz_answer';
                 }
-                // $content = $moduleobject->set_content($linkarray, $cm);
-                // $identifier = sha1($content);
             }
 
             // Group submissions where all students have to submit sets userid to 0.
