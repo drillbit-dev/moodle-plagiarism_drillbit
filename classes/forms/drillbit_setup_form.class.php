@@ -30,7 +30,7 @@ global $CFG;
 require_once($CFG->dirroot.'/plagiarism/drillbit/lib.php');
 require_once($CFG->libdir."/formslib.php");
 
-class drillbit_setup_form extends moodleform {
+class plagiarism_drillbit_setup_form extends moodleform {
     public function definition() {
         global $DB, $CFG;
 

@@ -16,7 +16,7 @@
 
 /**
  * @package   plagiarism_drillbit
- * @copyright 2012 iParadigms LLC
+ * @copyright 2021 Drillbit
  */
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
@@ -30,17 +30,17 @@ require_login();
 $paperid = required_param('paper_id', PARAM_INT);
 
 if ($paperid != null) {
-    $resultcode = update_expired_jwt_token();
+    $resultcode = plagiarism_drillbit_update_expired_jwt_token();
     if ($resultcode) {
         global $DB;
         $drillbitfile = $DB->get_record("plagiarism_drillbit_files", array("submissionid" => $paperid));
         if ($drillbitfile) {
-            $jwt = get_existing_jwt_token();
+            $jwt = plagiarism_drillbit_get_existing_jwt_token();
             $headers = array(
                 "Authorization: Bearer $jwt"
             );
 
-            $response = CallExternalAPI("GET", $drillbitfile->download_url, false, $headers);
+            $response = plagiarism_drillbit_call_external_api("GET", $drillbitfile->download_url, false, $headers);
             header('Content-Description: File Transfer');
             header('Content-Type: application/pdf');
             header('Content-Disposition: inline; filename=' . $paperid . '_' . microtime() . '.pdf');

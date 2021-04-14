@@ -16,7 +16,7 @@
 
 /**
  * @package   plagiarism_drillbit
- * @copyright 2012 iParadigms LLC
+ * @copyright 2021 Drillbit
  */
 
 /**

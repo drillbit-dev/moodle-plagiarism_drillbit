@@ -20,7 +20,8 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 require_once($CFG->dirroot.'/plagiarism/drillbit/lib.php');
-class drillbit_view{
+
+class plagiarism_drillbit_view{
 
     public function output_header($url, $title = '', $heading = '', $return = false) {
         global $PAGE, $OUTPUT;

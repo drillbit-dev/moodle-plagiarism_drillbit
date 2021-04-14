@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class drillbit_default_setup_form extends moodleform {
+class plagiarismdrillbit_default_setup_form extends moodleform {
 
     // Define the form.
     public function definition () {
@@ -33,9 +33,9 @@ class drillbit_default_setup_form extends moodleform {
 
         $mform = $this->_form;
 
-        require_once($CFG->dirroot.'/plagiarism/drillbit/classes/drillbit_view.class.php');
+        require_once($CFG->dirroot.'/plagiarism/drillbit/classes/plagiarism_drillbit_view.class.php');
 
-        $drillbitview = new drillbit_view();
+        $drillbitview = new plagiarism_drillbit_view();
         $drillbitview->add_elements_to_settings_form($mform, array(), "activity");
 
         $this->add_action_buttons(true);

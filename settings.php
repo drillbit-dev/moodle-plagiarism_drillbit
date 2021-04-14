@@ -16,7 +16,7 @@
 
 /**
  * @package   plagiarism_drillbit
- * @copyright 2012 iParadigms LLC
+ * @copyright 2021 Drillbit
  */
 
 require_once(__DIR__ . '/../../config.php');
@@ -38,10 +38,10 @@ global $DB;
 
 $PAGE->set_url(new moodle_url('/plagiarism/drillbit/settings.php'));
 $PAGE->set_context($context);
-$pagetitle = "Drillbit Plagiarism Settings";
+$pagetitle = get_string('settingspagetitle', 'plagiarism_drillbit');
 $PAGE->set_title($pagetitle);
 
-$settingsform = new drillbit_setup_form();
+$settingsform = new plagiarism_drillbit_setup_form();
 
 // $settingsform->display();
 
@@ -83,11 +83,11 @@ if ($settingsform->is_cancelled()) {
         }
 
         if (!$DB->insert_record('config_plugins', $drillbitconfigfield)) {
-            error("errorinserting");
+            mtrace("errorinserting");
         }
     }
 
-    $jwt = get_login_token($email, $pass, $folderid, $apikey);
+    $jwt = plagiarism_drillbit_get_login_token($email, $pass, $folderid, $apikey);
 
     $drillbitconfigfield = new stdClass();
     $drillbitconfigfield->value = $jwt;
@@ -100,11 +100,11 @@ if ($settingsform->is_cancelled()) {
     $drillbitenable->name = "enabled";
 
     if (!$DB->insert_record('config_plugins', $drillbitconfigfield)) {
-        error("errorinserting");
+        mtrace("errorinserting");
     }
 
     if (!$DB->insert_record('config_plugins', $drillbitenable)) {
-        error("errorinserting");
+        mtrace("errorinserting");
     }
 
     $output = $OUTPUT->notification(get_string('configsavesuccess', 'plagiarism_drillbit'), 'notifysuccess');
@@ -121,18 +121,21 @@ $settingsform->display();
 ?>
 <script>
     $("#id_connection_test").click(function() {
-
-        console.log("click called");
-        var apiBaseUrl = $("#id_plagiarism_drillbit_apiurl").val();
+        var api_base_url = $("#id_plagiarism_drillbit_apiurl").val();
         var email = $("#id_plagiarism_drillbit_emailid").val();
         var password = $("#id_plagiarism_drillbit_password").val();
+        var folder_id = $("#id_plagiarism_drillbit_folderid").val();
+        var api_key = $("#id_plagiarism_drillbit_apikey").val();
 
-        var formDataJson = {
+        var form_data_json = {
             username: email,
-            password: password
+            password: password,
+            api_key: api_key,
+            submissions_key: folder_id
         };
 
-        formDataJson = JSON.stringify(formDataJson);
+        form_data_json = JSON.stringify(form_data_json);
+        console.log(form_data_json);
 
         $.ajax({
             type: "POST",
@@ -140,23 +143,26 @@ $settingsform->display();
             //dataType: 'json',
             //contentType: 'application/json',
             data: {
-                data: formDataJson
+                data: form_data_json
             },
             success: function(data) {
                 if (data["jwt"]) {
                     var token = data["jwt"];
-                    var html = "<b>Connection test successfull</b><br/><p>Access Token => " + token + "</p>";
+                    var html = "<b>" + <?php echo json_encode(get_string('connsuccess', 'plagiarism_drillbit')); ?>;
+                    html += "</b><br/><p>Access Token => " + token + "</p>";
 
                     $('#api_conn_result').html(html);
                 } else if (data["status"]) {
-                    var html = "<b>Connection test failed</b><br/><p>Error => " + data["message"] + "</p>";
+                    var html = "<b>" + <?php echo json_encode(get_string('connfail', 'plagiarism_drillbit')); ?>;
+                    html += "</b><br/><p>Error => " + data["message"] + "</p>";
                     $('#api_conn_result').html(data);
                 }
 
             },
             error: function(err) {
-                var html = "<b>Connection test failed</b><br/><p>Error => " + err + "</p>";
-                $('#api_conn_result').html(data);
+                console.log(err);
+                var html = "<b>" + <?php get_string('connfail', 'plagiarism_drillbit'); ?> + "</b><br/><p>Error => " + err + "</p>";
+                $('#api_conn_result').html(err);
             }
         });
 

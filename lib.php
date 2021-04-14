@@ -16,7 +16,7 @@
 
 /**
  * @package   plagiarism_drillbit
- * @copyright 2012 iParadigms LLC
+ * @copyright 2021 Drillbit
  */
 
 use SimpleJWT\JWT;
@@ -293,7 +293,7 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
             $pathnamehashes = $eventdata["other"]["pathnamehashes"];
 
             foreach ($pathnamehashes as $identifier) {
-                $fileid = $this->create_new_drillbit_submission($cm, $userid, $identifier, $submissiontype, $eventdata['objectid']);
+                $fileid = $this->drillbit_create_new_submission($cm, $userid, $identifier, $submissiontype, $eventdata['objectid']);
             }
         } else if ($eventdata["other"]["modulename"]) {
             $modname = $eventdata["other"]["modulename"];
@@ -306,7 +306,7 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         return $result;
     }
 
-    private function create_new_drillbit_submission($cm, $userid, $identifier, $submissiontype, $itemid = 0) {
+    private function drillbit_create_new_submission($cm, $userid, $identifier, $submissiontype, $itemid = 0) {
         global $DB;
 
         $plagiarismfile = new stdClass();
@@ -360,7 +360,7 @@ function plagiarism_drillbit_coursemodule_standard_elements($formwrapper, $mform
     // print_r($formwrapper->get_current());
     // exit;
     if ($modulename == 'assign') {
-        $drillbitview = new drillbit_view();
+        $drillbitview = new plagiarism_drillbit_view();
 
         if ($PAGE->pagetype != 'course-editbulkcompletion' && $PAGE->pagetype != 'course-editdefaultcompletion') {
             // Create/Edit course in drillbit and join user to class.
@@ -377,7 +377,7 @@ function plagiarism_drillbit_coursemodule_edit_post_actions($data, $course) {
 
 function plagiarism_drillbit_send_queued_submissions() {
 
-    $resultcode = update_expired_jwt_token();
+    $resultcode = plagiarism_drillbit_update_expired_jwt_token();
     if ($resultcode) {
         global $CFG, $DB;
 
@@ -438,13 +438,13 @@ function plagiarism_drillbit_send_queued_submissions() {
                 $postdata["doc_type"] = "thesis";
                 $postdata["file"] = curl_file_create($tempfile, $mime, $filename);
 
-                $headers = get_file_headers($jwt->value);
+                $headers = plagiarism_drillbit_get_file_headers($jwt->value);
                 // print_debug($headers);
                 $url = "https://www.drillbitplagiarismcheck.com/drillbit_new/api/submission";
 
-                $request = CallExternalAPI("POST", $url, $postdata, $headers);
+                $request = plagiarism_drillbit_call_external_api("POST", $url, $postdata, $headers);
 
-                update_submission_response($request, $queueditem->id);
+                plagiarism_drillbit_update_submissions($request, $queueditem->id);
             }
         }
     } else {
@@ -454,7 +454,7 @@ function plagiarism_drillbit_send_queued_submissions() {
 
 function plagiarism_drillbit_update_reports() {
     global $DB;
-    $resultcode = update_expired_jwt_token();
+    $resultcode = plagiarism_drillbit_update_expired_jwt_token();
     if ($resultcode) {
         $queueditems = $DB->get_records_select(
             "plagiarism_drillbit_files",
@@ -473,16 +473,16 @@ function plagiarism_drillbit_update_reports() {
             $jwt = $DB->get_record("config_plugins", array("plugin" => "plagiarism_drillbit", "name" => "jwt"));
             $headers = array("Authorization: Bearer $jwt->value", "Accept: application/json");
 
-            $request = CallExternalAPI("GET", $callback, false, $headers);
+            $request = plagiarism_drillbit_call_external_api("GET", $callback, false, $headers);
 
-            update_submission_response($request, $queueditem->id);
+            plagiarism_drillbit_update_submissions($request, $queueditem->id);
         }
     } else {
         mtrace("Unable to authenticate against Drillbit API. Please contact Drillbit Support");
     }
 }
 
-function get_file_headers($authtoken) {
+function plagiarism_drillbit_get_file_headers($authtoken) {
     $headers = array(
         "Authorization: Bearer $authtoken",
         'Content-type: multipart/form-data'
@@ -491,14 +491,14 @@ function get_file_headers($authtoken) {
     return $headers;
 }
 
-function update_expired_jwt_token() {
+function plagiarism_drillbit_update_expired_jwt_token() {
     global $DB;
     $resultcode = 0;
     $email = "";
     $password = "";
     $apikey = "";
     $folderid = "";
-    $existingtoken = get_existing_jwt_token();
+    $existingtoken = plagiarism_drillbit_get_existing_jwt_token();
     $deserializedtoken = null;
     if (!empty($existingtoken)) {
         try {
@@ -546,7 +546,7 @@ function update_expired_jwt_token() {
     if (empty($email) || empty($password) || empty($apikey) || empty($folderid)) {
         $resultcode = 0;
     }
-    $token = get_login_token($email, $password, $folderid, $apikey);
+    $token = plagiarism_drillbit_get_login_token($email, $password, $folderid, $apikey);
     if ($token != null) {
         $resultcode = 1;
     }
@@ -561,7 +561,7 @@ function update_expired_jwt_token() {
     return $resultcode;
 }
 
-function get_existing_jwt_token() {
+function plagiarism_drillbit_get_existing_jwt_token() {
     global $DB;
     $jwt = $DB->get_record("config_plugins", array("plugin" => "plagiarism_drillbit", "name" => "jwt"));
 
@@ -572,7 +572,7 @@ function get_existing_jwt_token() {
     }
 }
 
-function get_login_token($email, $pass, $folderid, $apikey) {
+function plagiarism_drillbit_get_login_token($email, $pass, $folderid, $apikey) {
     $loginparams = array();
     $loginparams["username"] = $email;
     $loginparams["password"] = $pass;
@@ -583,7 +583,7 @@ function get_login_token($email, $pass, $folderid, $apikey) {
 
     $url = "https://www.drillbitplagiarismcheck.com/drillbit_new/api/authenticate/moodle";
 
-    $request = CallExternalAPI("POST", $url, $jsonrequest);
+    $request = plagiarism_drillbit_call_external_api("POST", $url, $jsonrequest);
 
     $response = json_decode($request);
 
@@ -594,7 +594,7 @@ function get_login_token($email, $pass, $folderid, $apikey) {
     }
 }
 
-function CallExternalAPI($method, $url, $data = false, $headers = array("content-type:application/json")) {
+function plagiarism_drillbit_call_external_api($method, $url, $data = false, $headers = array("content-type:application/json")) {
     $curl = curl_init();
 
     switch ($method) {
@@ -670,7 +670,7 @@ function print_debug($object) {
     exit;
 }
 
-function update_submission_response($response, $fileid) {
+function plagiarism_drillbit_update_submissions($response, $fileid) {
     global $DB;
     $responseobj = json_decode($response, true);
 

@@ -16,7 +16,7 @@
 
 /**
  * @package   plagiarism_drillbit
- * @copyright 2012 iParadigms LLC
+ * @copyright 2021 Drillbit
  */
 
 /*
@@ -27,6 +27,9 @@
 // General.
 $string['pluginname'] = 'Drillbit plagiarism plugin';
 $string['drillbit'] = 'Drillbit';
+$string['settingspagetitle'] = 'Drillbit Plagiarism Settings';
+$string['connsuccess'] = 'Connection Test Successfull';
+$string['connfail'] = 'Connection Test Failed';
 $string['usedrillbit_mod'] = 'Enable Drillbit for {$a}';
 $string['drillbitconfig'] = 'Drillbit Plagiarism Plugin Configuration';
 $string['drillbitexplain'] = 'Drillbit is a commercial product and you must have a paid subscription to use this service for more information see <a href=http://docs.moodle.org/en/Drillbit_administration>http://docs.moodle.org/en/Drillbit_administration</a>';
@@ -51,3 +54,4 @@ $string['queued'] = 'Queued';
 $string['submitted'] = 'Submitted';
 $string['completed'] = 'Completed';
 $string['vwreport'] = 'View Drillbit Report';
+$string['unauthorizedtestconn'] = 'This API can only be accessible by Site Administrator.';
