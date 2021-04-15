@@ -18,6 +18,9 @@
  * @package   plagiarism_drillbit
  * @copyright 2021 Drillbit
  */
+
+use core\update\validator;
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
@@ -35,6 +38,13 @@ if ($paperid != null) {
         global $DB;
         $drillbitfile = $DB->get_record("plagiarism_drillbit_files", array("submissionid" => $paperid));
         if ($drillbitfile) {
+            $hasaccess = has_access_to_view_report($drillbitfile->cm);
+
+            if (!$hasaccess) {
+                echo get_string('reportfailnoaccess', 'plagiarism_drillbit');
+                exit(0);
+            }
+
             $jwt = plagiarism_drillbit_get_existing_jwt_token();
             $headers = array(
                 "Authorization: Bearer $jwt"
@@ -55,10 +65,44 @@ if ($paperid != null) {
             flush();
         }
     } else {
-        echo "<h3>Unable to view report for this document.";
+        echo get_string('reportfailgeneric', 'plagiarism_drillbit');
         exit();
     }
 } else {
-    echo "<h3>Unable to view report for this document.";
+    echo get_string('reportfailgeneric', 'plagiarism_drillbit');
     exit();
+}
+
+function has_access_to_view_report($cm) {
+    global $USER;
+    $coursemodule = get_coursemodule_from_id('assign', $cm);
+    if (empty($coursemodule)) {
+        echo get_string('reportfailnocm', 'plagiarism_drillbit');
+        exit(0);
+    }
+    $rolenames = ['student', 'editingteacher'];
+    $context = context_course::instance($coursemodule->course);
+    $roles = get_user_roles($context, $USER->id, true);
+    $enrolled = is_enrolled($context, $USER->id, '', true);
+
+    $validrole = false;
+    foreach ($roles as $role) {
+        if (in_array($role->shortname, $rolenames)) {
+            $validrole = true;
+            break;
+        }
+    }
+
+    $hasaccess = false;
+
+    if ($enrolled && $validrole) {
+        $hasaccess = true;
+    }
+
+    if (is_siteadmin()) {
+        $hasaccess = true;
+    }
+
+    return $hasaccess;
+
 }
