@@ -594,7 +594,7 @@ function plagiarism_drillbit_get_login_token($email, $pass, $folderid, $apikey) 
     }
 }
 
-function plagiarism_drillbit_call_external_api($method, $url, $data = false, $headers = array("content-type:application/json")) {
+function plagiarism_drillbit_call_external_api_old($method, $url, $data = false, $headers = array("content-type:application/json")) {
     $curl = curl_init();
 
     switch ($method) {
@@ -620,6 +620,32 @@ function plagiarism_drillbit_call_external_api($method, $url, $data = false, $he
 
     $result = curl_exec($curl);
     curl_close($curl);
+    return $result;
+}
+
+function plagiarism_drillbit_call_external_api($method, $url, $data = false, $headers = array("content-type:application/json")) {
+    $curl = new curl(array('proxy' => true));
+    $curloptions = array();
+    $curloptions['CURLOPT_RETURNTRANSFER'] = 1;
+    $curloptions['CURLOPT_HTTPAUTH'] = CURLAUTH_BASIC;
+    $curloptions['CURLOPT_TIMEOUT'] = 60;
+
+    $curl->setHeader($headers);
+    $curl->setopt($curloptions);
+
+    $result = null;
+    switch ($method) {
+        case "POST":
+            $result = $curl->post($url, $data);
+            break;
+        case "PUT":
+            $curloptions['CURLOPT_PUT'] = 1;
+            break;
+        default:
+            $result = $curl->get($url, $data);
+    }
+
+    //print_debug($result);
     return $result;
 }
 

@@ -45,13 +45,15 @@ class plagiarism_drillbit_setup_form extends moodleform {
         $mods = array_keys(core_component::get_plugin_list('mod'));
         foreach ($mods as $mod) {
             if (plugin_supports('mod', $mod, FEATURE_PLAGIARISM)) {
-                $mform->addElement('advcheckbox',
+                if ($mod == "assign") {
+                    $mform->addElement('advcheckbox',
                     'plagiarism_drillbit_mod_'.$mod,
                     get_string('usedrillbit_mod', 'plagiarism_drillbit', ucfirst($mod)),
                     '',
                     null,
                     array(0, 1)
-                );
+                    );
+                }
             }
         }
 

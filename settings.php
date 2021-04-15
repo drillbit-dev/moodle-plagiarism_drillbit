@@ -111,7 +111,7 @@ if ($settingsform->is_cancelled()) {
 }
 
 $plagiarismdrillbitsettings = (array)get_config('plagiarism_drillbit');
-// print_r($plagiarismdrillbitsettings);exit;
+
 $settingsform->set_data($plagiarismdrillbitsettings);
 
 echo $OUTPUT->header();
