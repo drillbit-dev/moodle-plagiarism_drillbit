@@ -25,10 +25,6 @@ require_once($CFG->libdir . '/plagiarismlib.php');
 require_once($CFG->dirroot . '/plagiarism/drillbit/lib.php');
 require_once($CFG->dirroot . '/plagiarism/drillbit/classes/forms/drillbit_setup_form.class.php');
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 $PAGE->requires->jquery();
 require_login();
 admin_externalpage_setup('plagiarismdrillbit');

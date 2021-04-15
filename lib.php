@@ -297,8 +297,6 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         $userid = $eventdata["userid"];
         $relateduser = $eventdata["relateduserid"];
         $submissiontype = "file";
-        // A $cm = get_coursemodule_from_id('mod_assign', $eventdata['contextinstanceid']);
-        // P print_debug($cm);
 
         if (isset($eventdata["other"]) &&
         $eventdata["other"]["modulename"] == "assign" &&
@@ -465,7 +463,6 @@ function plagiarism_drillbit_send_queued_submissions() {
                     fwrite($fh, $textcontent);
                     fclose($fh);
                 } catch (Exception $e) {
-                    // plagiarism_drillbit_activitylog('File content not found on submission: '.$queueditem->identifier, 'PP_NO_FILE');
                     mtrace($e);
                     mtrace('File content not found on submission. Identifier: ' . $queueditem->identifier);
                 }
@@ -480,16 +477,15 @@ function plagiarism_drillbit_send_queued_submissions() {
                 $postdata["assignment_id"] = $folderid->value;
                 $postdata["doc_type"] = "thesis";
 
-                if ($modconfig) {
+                if (!empty($modconfig)) {
                     $postdata["exclude_refernces"] = $modconfig["plagiarism_exclude_references"];
                     $postdata["exclude_quotes"] = $modconfig["plagiarism_exclude_quotes"];
                     $postdata["exclude_small_sources"] = $modconfig["plagiarism_exclude_smallsources"];
                 }
-                
+
                 $postdata["file"] = curl_file_create($tempfile, $mime, $filename);
 
                 $headers = plagiarism_drillbit_get_file_headers($jwt->value);
-                // print_debug($headers);
                 $url = "https://www.drillbitplagiarismcheck.com/drillbit_new/api/submission";
 
                 $request = plagiarism_drillbit_call_external_api("POST", $url, $postdata, $headers);
@@ -666,7 +662,6 @@ function plagiarism_drillbit_call_external_api($method, $url, $data = false, $he
             $result = $curl->get($url, $data);
     }
 
-    // print_debug($result);
     return $result;
 }
 
@@ -709,12 +704,6 @@ function plagiarism_drillbit_tempfile($filename, $suffix) {
     } while (!touch($file));
 
     return $file;
-}
-
-function print_debug($object) {
-    echo "<pre>";
-    print_r ($object);
-    exit;
 }
 
 function plagiarism_drillbit_get_cm_settings($cmid) {
