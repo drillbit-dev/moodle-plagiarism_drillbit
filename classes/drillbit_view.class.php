@@ -37,20 +37,29 @@ class plagiarism_drillbit_view{
         }
     }
 
-    public function add_elements_to_settings_form($mform, $course, $location = "activity", $modulename = "", $cmid = 0, $currentrubric = 0) {
+    public function add_elements_to_settings_form($mform, $course,
+    $location = "activity", $modulename = "", $cmid = 0, $currentrubric = 0) {
         if ($location == "activity" && $modulename != 'mod_forum') {
-            $mform->addElement('header', 'plagiarism_drillbit_plugin_default_settings', get_string('drillbitplugindefaultsettings', 'plagiarism_drillbit'));
+            $cmconfig = null;
+            if ($cmid > 0) {
+                $cmconfig = plagiarism_drillbit_get_cm_settings($cmid);
+            }
+            $mform->addElement('header', 'plagiarism_drillbit_plugin_default_settings',
+            get_string('drillbitplugindefaultsettings', 'plagiarism_drillbit'));
             $mform->setExpanded('plagiarism_drillbit_plugin_default_settings');
 
             $options = array(0 => get_string('no', 'plagiarism_drillbit'), 1 => get_string('yes', 'plagiarism_drillbit'));
-            $excludereferencesselect = $mform->addElement('select', 'plagiarism_exclude_references', get_string("excludereferences", "plagiarism_drillbit"), $options);
-            $excludereferencesselect->setSelected('0');
+            $excludereferencesselect = $mform->addElement('select', 'plagiarism_exclude_references',
+            get_string("excludereferences", "plagiarism_drillbit"), $options);
+            $excludereferencesselect->setSelected($cmconfig == null ? 0 : $cmconfig['plagiarism_exclude_references']);
 
-            $excludequotesselect = $mform->addElement('select', 'plagiarism_exclude_quotes', get_string("excludequotes", "plagiarism_drillbit"), $options);
-            $excludequotesselect->setSelected('1');
+            $excludequotesselect = $mform->addElement('select', 'plagiarism_exclude_quotes',
+            get_string("excludequotes", "plagiarism_drillbit"), $options);
+            $excludequotesselect->setSelected($cmconfig == null ? 1 : $cmconfig['plagiarism_exclude_quotes']);
 
-            $excludesmallsources = $mform->addElement('select', 'plagiarism_exclude_smallsources', get_string("excludesmallsources", "plagiarism_drillbit"), $options);
-            $excludesmallsources->setSelected('0');
+            $excludesmallsources = $mform->addElement('select', 'plagiarism_exclude_smallsources',
+            get_string("excludesmallsources", "plagiarism_drillbit"), $options);
+            $excludesmallsources->setSelected($cmconfig == null ? 0 : $cmconfig['plagiarism_exclude_smallsources']);
         }
     }
 }

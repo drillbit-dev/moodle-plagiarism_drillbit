@@ -49,7 +49,7 @@ class provider implements
      * @param $collection collection a reference to the collection to use to store the metadata.
      * @return $collection the updated collection of metadata items.
      */
-    public static function _get_metadata(collection $collection) {
+    public static function plagiarism_drillbit_get_metadata(collection $collection) {
 
         $collection->link_subsystem(
             'core_files',
@@ -93,7 +93,7 @@ class provider implements
      * @param int $userid the userid.
      * @return contextlist the list of contexts containing user info for the user.
      */
-    public static function _get_contexts_for_userid($userid) {
+    public static function plagiarism_drillbit_get_contexts_for_userid($userid) {
 
         $params = ['modulename' => 'assign',
             'contextlevel' => CONTEXT_MODULE,
@@ -122,7 +122,8 @@ class provider implements
      * @param   array       $subcontext The subcontext within the context to export this information to.
      * @param   array       $linkarray The weird and wonderful link array used to display information for a specific item
      */
-    public static function _export_plagiarism_user_data($userid, \context $context, array $subcontext, array $linkarray) {
+    public static function plagiarism_drillbit_export_plagiarism_user_data($userid,
+    \context $context, array $subcontext, array $linkarray) {
         global $DB;
 
         if (empty($userid)) {
@@ -146,7 +147,8 @@ class provider implements
 
         foreach ($submissions as $submission) {
             $context = \context_module::instance($submission->cm);
-            self::_export_plagiarism_drillbit_data_for_user((array)$submission, $context, $user);
+            self::plagiarism_drillbit_export_plagiarism_drillbit_data_for_user((array)$submission,
+            $context, $user);
         }
     }
 
@@ -157,7 +159,8 @@ class provider implements
      * @param \context_module $context the module context.
      * @param \stdClass $user the user record
      */
-    protected static function _export_plagiarism_drillbit_data_for_user(array $submissiondata, \context_module $context, \stdClass $user) {
+    protected static function plagiarism_drillbit_export_plagiarism_drillbit_data_for_user(array $submissiondata,
+    \context_module $context, \stdClass $user) {
         // Fetch the generic module data.
         $contextdata = helper::get_context_data($context, $user);
 
@@ -174,7 +177,7 @@ class provider implements
      *
      * @param \context $context the context to delete in.
      */
-    public static function _delete_plagiarism_for_context(\context $context) {
+    public static function plagiarism_drillbit_delete_plagiarism_for_context(\context $context) {
         global $DB;
 
         if (empty($context)) {
@@ -196,7 +199,7 @@ class provider implements
      * @param  int      $userid    The user to delete
      * @param  \context $context   The context to refine the deletion.
      */
-    public static function _delete_plagiarism_for_user($userid, \context $context) {
+    public static function plagiarism_drillbit_delete_plagiarism_for_user($userid, \context $context) {
         global $DB;
 
         if (!$context instanceof \context_module) {

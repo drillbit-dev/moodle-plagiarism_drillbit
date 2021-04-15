@@ -43,8 +43,6 @@ $PAGE->set_title($pagetitle);
 
 $settingsform = new plagiarism_drillbit_setup_form();
 
-// $settingsform->display();
-
 if ($settingsform->is_cancelled()) {
     redirect($CFG->wwwroot . '/admin/category.php?category=plagiarism', 'No changes Done.');
 } else if ($settingsformdata = $settingsform->get_data()) {

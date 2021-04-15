@@ -227,8 +227,10 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
             }
 
             if ($plagiarismfile->statuscode == 'queued') {
-                $statusstr = get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('queued', 'plagiarism_drillbit');
-                $content = $OUTPUT->pix_icon('drillbitIcon', $statusstr, 'plagiarism_drillbit', array('class' => 'icon_size')) . $statusstr;
+                $statusstr =
+                get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('queued', 'plagiarism_drillbit');
+                $content = $OUTPUT->pix_icon('drillbitIcon', $statusstr,
+                'plagiarism_drillbit', array('class' => 'icon_size')) . $statusstr;
 
                 $output .= html_writer::tag(
                     'div',
@@ -236,8 +238,10 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                     array('class' => 'drillbit_status')
                 );
             } else if ($plagiarismfile->statuscode == 'submitted') {
-                $statusstr = get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('submitted', 'plagiarism_drillbit');
-                $content = $OUTPUT->pix_icon('drillbitIcon', $statusstr, 'plagiarism_drillbit', array('class' => 'icon_size')) . $statusstr;
+                $statusstr =
+                get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('submitted', 'plagiarism_drillbit');
+                $content = $OUTPUT->pix_icon('drillbitIcon', $statusstr,
+                'plagiarism_drillbit', array('class' => 'icon_size')) . $statusstr;
 
                 $output .= html_writer::tag(
                     'div',
@@ -245,9 +249,12 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                     array('class' => 'drillbit_status')
                 );
             } else if ($plagiarismfile->statuscode == 'completed') {
-                $statusstr = get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('completed', 'plagiarism_drillbit');
-                $score = "&nbsp;&nbsp;<b>" . "Similarity Score: " . $plagiarismfile->similarityscore . " </b>";
-                $content = $OUTPUT->pix_icon('drillbitIcon', $statusstr, 'plagiarism_drillbit', array('class' => 'icon_size')) . $statusstr . $score;
+                $statusstr =
+                get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('completed', 'plagiarism_drillbit');
+                $score =
+                "&nbsp;&nbsp;<b>" . "Similarity Score: " . $plagiarismfile->similarityscore . " </b>";
+                $content = $OUTPUT->pix_icon('drillbitIcon', $statusstr,
+                'plagiarism_drillbit', array('class' => 'icon_size')) . $statusstr . $score;
 
                 $output .= html_writer::tag(
                     'div',
@@ -258,15 +265,19 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                 $href = html_writer::tag(
                     'a',
                     get_string('vwreport', 'plagiarism_drillbit'),
-                    array('class' => 'drillbit_report_link', 'href' => '/plagiarism/drillbit/report_file.php?paper_id=' . $plagiarismfile->submissionid, 'target' => '_blank')
+                    array('class' => 'drillbit_report_link',
+                    'href' => '/plagiarism/drillbit/report_file.php?paper_id=' . $plagiarismfile->submissionid,
+                     'target' => '_blank')
                 );
 
                 $output .= html_writer::div($href, "drillbit_report_link_class");
             } else {
-                $statusstr = get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('pending', 'plagiarism_drillbit');
+                $statusstr =
+                get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('pending', 'plagiarism_drillbit');
                 $output .= html_writer::tag(
                     'div',
-                    $OUTPUT->pix_icon('drillbitIcon', $statusstr, 'plagiarism_drillbit', array('class' => 'icon_size')) . $statusstr,
+                    $OUTPUT->pix_icon('drillbitIcon', $statusstr,
+                    'plagiarism_drillbit', array('class' => 'icon_size')) . $statusstr,
                     array('class' => 'drillbit_status')
                 );
             }
@@ -286,10 +297,12 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         $userid = $eventdata["userid"];
         $relateduser = $eventdata["relateduserid"];
         $submissiontype = "file";
-        // $cm = get_coursemodule_from_id('mod_assign', $eventdata['contextinstanceid']);
-        // print_debug($cm);
+        // A $cm = get_coursemodule_from_id('mod_assign', $eventdata['contextinstanceid']);
+        // P print_debug($cm);
 
-        if (isset($eventdata["other"]) && $eventdata["other"]["modulename"] == "assign" && $eventdata["eventtype"] == "file_uploaded") {
+        if (isset($eventdata["other"]) &&
+        $eventdata["other"]["modulename"] == "assign" &&
+        $eventdata["eventtype"] == "file_uploaded") {
             $pathnamehashes = $eventdata["other"]["pathnamehashes"];
 
             foreach ($pathnamehashes as $identifier) {
@@ -297,10 +310,9 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
             }
         } else if ($eventdata["other"]["modulename"]) {
             $modname = $eventdata["other"]["modulename"];
-            // coming soon
+            // Coming soon.
         } else {
             mtrace("Invalid mod name");
-            // coming soon
         }
 
         return $result;
@@ -352,26 +364,56 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
 }
 
 function plagiarism_drillbit_coursemodule_standard_elements($formwrapper, $mform) {
-    // Call code to get examplefield from database
-    // For example $existing = get_existing($coursemodule);
-    // You have to write get_existing.
     global $DB, $PAGE, $COURSE;
     $modulename = $formwrapper->get_current()->modulename;
-    // print_r($formwrapper->get_current());
-    // exit;
+    $cmid = $formwrapper->get_current()->coursemodule;
+
     if ($modulename == 'assign') {
         $drillbitview = new plagiarism_drillbit_view();
 
         if ($PAGE->pagetype != 'course-editbulkcompletion' && $PAGE->pagetype != 'course-editdefaultcompletion') {
             // Create/Edit course in drillbit and join user to class.
             // $course = $this->get_course_data($cmid, $COURSE->id);
-            $drillbitview->add_elements_to_settings_form($mform, "", "activity");
+            $drillbitview->add_elements_to_settings_form($mform, "", "activity", "", $cmid);
         }
     }
 }
 
 function plagiarism_drillbit_coursemodule_edit_post_actions($data, $course) {
-    // print_r($data);exit;
+    $exrefval = $data->plagiarism_exclude_references;
+    $exquoteval = $data->plagiarism_exclude_quotes;
+    $exsmallsourceval = $data->plagiarism_exclude_smallsources;
+    $confighashref = $data->coursemodule . '_plagiarism_exclude_references';
+    $confighashquote = $data->coursemodule . '_plagiarism_exclude_quotes';
+    $confighashsmallsource = $data->coursemodule . '_plagiarism_exclude_smallsources';
+
+    plagiarism_drillbit_update_cm_post_actions('plagiarism_exclude_references',
+    $exrefval, $confighashref, $data->coursemodule);
+
+    plagiarism_drillbit_update_cm_post_actions('plagiarism_exclude_quotes',
+    $exquoteval, $confighashquote, $data->coursemodule);
+
+    plagiarism_drillbit_update_cm_post_actions('plagiarism_exclude_smallsources',
+    $exsmallsourceval, $confighashsmallsource, $data->coursemodule);
+}
+
+function plagiarism_drillbit_update_cm_post_actions($name, $value, $hash, $cm) {
+    global $DB;
+    $update = $DB->get_record('drillbit_plugin_config', ['config_hash' => $hash]);
+
+    if ($update) {
+        $toupdate = new stdClass();
+        $toupdate->id = $update->id;
+        $toupdate->value = $value;
+        $DB->update_record("drillbit_plugin_config", $toupdate);
+    } else {
+        $insert = new stdClass();
+        $insert->cm = $cm;
+        $insert->name = $name;
+        $insert->value = $value;
+        $insert->config_hash = $hash;
+        $DB->insert_record('drillbit_plugin_config', $insert);
+    }
 }
 
 
@@ -391,12 +433,15 @@ function plagiarism_drillbit_send_queued_submissions() {
             PLAGIARISM_DRILLBIT_CRON_SUBMISSIONS_LIMIT
         );
 
-        $folderid = $DB->get_record("config_plugins", array("plugin" => "plagiarism_drillbit", "name" => "plagiarism_drillbit_folderid"));
-        $jwt = $DB->get_record("config_plugins", array("plugin" => "plagiarism_drillbit", "name" => "jwt"));
+        $folderid = $DB->get_record("config_plugins",
+        array("plugin" => "plagiarism_drillbit", "name" => "plagiarism_drillbit_folderid"));
+        $jwt = $DB->get_record("config_plugins",
+        array("plugin" => "plagiarism_drillbit", "name" => "jwt"));
 
         foreach ($queueditems as $queueditem) {
             $errorcode = 0;
             $cm = get_coursemodule_from_id('', $queueditem->cm);
+            $modconfig = plagiarism_drillbit_get_cm_settings($queueditem->cm);
 
             if ($queueditem->submissiontype == 'file') {
                 $fs = get_file_storage();
@@ -408,11 +453,9 @@ function plagiarism_drillbit_send_queued_submissions() {
                     $errorcode = 9;
                 }
 
-                // print_debug($file);
                 $title = $file->get_filename();
                 $filename = $file->get_filename();
                 $mime = $file->get_mimetype();
-                // $mime = $file->get_mime();
 
                 $tempfile = null;
                 try {
@@ -436,6 +479,13 @@ function plagiarism_drillbit_send_queued_submissions() {
                 $postdata["title"] = $cm->name;
                 $postdata["assignment_id"] = $folderid->value;
                 $postdata["doc_type"] = "thesis";
+
+                if ($modconfig) {
+                    $postdata["exclude_refernces"] = $modconfig["plagiarism_exclude_references"];
+                    $postdata["exclude_quotes"] = $modconfig["plagiarism_exclude_quotes"];
+                    $postdata["exclude_small_sources"] = $modconfig["plagiarism_exclude_smallsources"];
+                }
+                
                 $postdata["file"] = curl_file_create($tempfile, $mime, $filename);
 
                 $headers = plagiarism_drillbit_get_file_headers($jwt->value);
@@ -594,35 +644,6 @@ function plagiarism_drillbit_get_login_token($email, $pass, $folderid, $apikey) 
     }
 }
 
-function plagiarism_drillbit_call_external_api_old($method, $url, $data = false, $headers = array("content-type:application/json")) {
-    $curl = curl_init();
-
-    switch ($method) {
-        case "POST":
-            curl_setopt($curl, CURLOPT_POST, 1);
-
-            if ($data) { curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-            }
-            break;
-        case "PUT":
-            curl_setopt($curl, CURLOPT_PUT, 1);
-            break;
-        default:
-            if ($data) { $url = sprintf("%s?%s", $url, http_build_query($data));
-            }
-    }
-
-    // Optional Authentication:
-    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-
-    $result = curl_exec($curl);
-    curl_close($curl);
-    return $result;
-}
-
 function plagiarism_drillbit_call_external_api($method, $url, $data = false, $headers = array("content-type:application/json")) {
     $curl = new curl(array('proxy' => true));
     $curloptions = array();
@@ -645,7 +666,7 @@ function plagiarism_drillbit_call_external_api($method, $url, $data = false, $he
             $result = $curl->get($url, $data);
     }
 
-    //print_debug($result);
+    // print_debug($result);
     return $result;
 }
 
@@ -692,8 +713,18 @@ function plagiarism_drillbit_tempfile($filename, $suffix) {
 
 function print_debug($object) {
     echo "<pre>";
-    print_r($object);
+    print_r ($object);
     exit;
+}
+
+function plagiarism_drillbit_get_cm_settings($cmid) {
+    global $DB;
+    $data = $DB->get_records('drillbit_plugin_config', ['cm' => $cmid]);
+    $modsettings = [];
+    foreach ($data as $key => $value) {
+        $modsettings[$value->name] = $value->value;
+    }
+    return $modsettings;
 }
 
 function plagiarism_drillbit_update_submissions($response, $fileid) {

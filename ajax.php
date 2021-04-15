@@ -43,16 +43,6 @@ if ($method === "external") {
         $result = plagiarism_drillbit_call_external_api("POST", $url, $datatopost, array("content-type:application/json"));
         echo $result;
     }
-} else if ($method == "test") {
-    $urlget = "https://jsonplaceholder.typicode.com/posts";
-    $urlpost = "https://webhook.site/502746d2-76a8-4f61-aa0b-6e44da7e7aa3";
-    $postdata = [];
-    $postdata['status'] = true;
-    $postdata['message'] = 'Trying to post sample json';
-    $postdata = json_encode($postdata);
-    $result = plagiarism_drillbit_call_external_api("POST", $urlpost, $postdata, array("content-type:application/json"));
-} else if ($method == "drillbit") {
-    
 } else {
     $status = [];
     $status["status"] = false;
