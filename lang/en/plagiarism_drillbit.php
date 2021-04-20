@@ -30,6 +30,8 @@ $string['drillbit'] = 'Drillbit';
 $string['settingspagetitle'] = 'Drillbit plagiarism Settings';
 $string['connsuccess'] = 'Connection test Successfull';
 $string['connfail'] = 'Connection test Failed';
+$string['drillbit:enable'] = 'Enable Drillbit';
+$string['drillbit:viewfullreport'] = 'View Drillbit Report';
 $string['usedrillbit_mod'] = 'Enable Drillbit for {$a}';
 $string['drillbitconfig'] = 'Drillbit plagiarism plugin Configuration';
 $string['drillbitexplain'] = 'Drillbit is a commercial product and you must have a paid subscription to use this service for more information see <a href=http://docs.moodle.org/en/Drillbit_administration>http://docs.moodle.org/en/Drillbit_administration</a>';
@@ -58,3 +60,4 @@ $string['unauthorizedtestconn'] = 'This api can only be accessible by site Admin
 $string['reportfailgeneric'] = '<h3>Unable to view report for this document.</h3>';
 $string['reportfailnocm'] = '<h3>Unable to view report for this document. Course module is empty</h3>';
 $string['reportfailnoaccess'] = '<h3>Unable to view report for this document. Invalid role or user not authorized to view this submission report</h3>';
+$string['showstudentreports'] = 'Show Reports to Students';

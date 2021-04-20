@@ -37,6 +37,7 @@ require_once($CFG->dirroot . '/plagiarism/drillbit/classes/drillbit_view.class.p
 define('PLAGIARISM_DRILLBIT_CRON_SUBMISSIONS_LIMIT', 100);
 define('PLAGIARISM_DRILLBIT_MAX_FILENAME_LENGTH', 180);
 define('PLAGIARISM_DRILLBIT_MAX_FILE_UPLOAD_SIZE', 104857600);
+define('PLAGIARISM_DRILLBIT_SHOW_STUDENT_REPORT_ALWAYS', true);
 
 
 // Get helper methods.
@@ -378,12 +379,17 @@ function plagiarism_drillbit_coursemodule_standard_elements($formwrapper, $mform
 }
 
 function plagiarism_drillbit_coursemodule_edit_post_actions($data, $course) {
+    $showstudreports = $data->plagiarism_show_student_reports;
     $exrefval = $data->plagiarism_exclude_references;
     $exquoteval = $data->plagiarism_exclude_quotes;
     $exsmallsourceval = $data->plagiarism_exclude_smallsources;
     $confighashref = $data->coursemodule . '_plagiarism_exclude_references';
     $confighashquote = $data->coursemodule . '_plagiarism_exclude_quotes';
     $confighashsmallsource = $data->coursemodule . '_plagiarism_exclude_smallsources';
+    $configshowstudreports = $data->coursemodule . '_plagiarism_show_student_reports';
+
+    plagiarism_drillbit_update_cm_post_actions('plagiarism_show_student_reports',
+    $showstudreports, $configshowstudreports, $data->coursemodule);
 
     plagiarism_drillbit_update_cm_post_actions('plagiarism_exclude_references',
     $exrefval, $confighashref, $data->coursemodule);
@@ -497,6 +503,8 @@ function plagiarism_drillbit_send_queued_submissions() {
         mtrace("Unable to authenticate against Drillbit API. Please contact Drillbit Support");
     }
 }
+
+
 
 function plagiarism_drillbit_update_reports() {
     global $DB;
@@ -714,6 +722,16 @@ function plagiarism_drillbit_get_cm_settings($cmid) {
         $modsettings[$value->name] = $value->value;
     }
     return $modsettings;
+}
+
+function plagiarism_drillbit_get_plugin_global_settings() {
+    global $DB;
+    $data = $DB->get_records('config_plugins', ['plugin' => 'plagiarism_drillbit']);
+    $pluginsettings = [];
+    foreach ($data as $key => $value) {
+        $pluginsettings[$value->name] = $value->value;
+    }
+    return $pluginsettings;
 }
 
 function plagiarism_drillbit_update_submissions($response, $fileid) {

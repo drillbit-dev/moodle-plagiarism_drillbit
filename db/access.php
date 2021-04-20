@@ -31,11 +31,12 @@ $capabilities = array(
         )
     ),
     'plagiarism/drillbit:viewfullreport' => array(
-        'captype' => 'read',
+        'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
          'legacy' => array(
-         'editingteacher' => CAP_ALLOW,
-         'manager' => CAP_ALLOW
+            'editingteacher' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
         )
     ),
 );

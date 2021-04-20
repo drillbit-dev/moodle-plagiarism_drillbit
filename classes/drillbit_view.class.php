@@ -49,6 +49,11 @@ class plagiarism_drillbit_view{
             $mform->setExpanded('plagiarism_drillbit_plugin_default_settings');
 
             $options = array(0 => get_string('no', 'plagiarism_drillbit'), 1 => get_string('yes', 'plagiarism_drillbit'));
+            
+            $showreportstostudents = $mform->addElement('select', 'plagiarism_show_student_reports',
+            get_string("showstudentreports", "plagiarism_drillbit"), $options);
+            $showreportstostudents->setSelected('1');
+
             $excludereferencesselect = $mform->addElement('select', 'plagiarism_exclude_references',
             get_string("excludereferences", "plagiarism_drillbit"), $options);
             $excludereferencesselect->setSelected($cmconfig == null ? 0 : $cmconfig['plagiarism_exclude_references']);

@@ -34,8 +34,8 @@ if ($paperid != null) {
         global $DB;
         $drillbitfile = $DB->get_record("plagiarism_drillbit_files", array("submissionid" => $paperid));
         if ($drillbitfile) {
-            $hasaccess = has_access_to_view_report($drillbitfile->cm);
-
+            $hasaccess = has_access_to_view_report($drillbitfile->cm, $drillbitfile->userid);
+            // print_r(json_encode($hasaccess));exit;
             if (!$hasaccess) {
                 echo get_string('reportfailnoaccess', 'plagiarism_drillbit');
                 exit(0);
@@ -69,36 +69,48 @@ if ($paperid != null) {
     exit();
 }
 
-function has_access_to_view_report($cm) {
+function has_access_to_view_report($cm, $reportfileuser) {
     global $USER;
     $coursemodule = get_coursemodule_from_id('assign', $cm);
+
     if (empty($coursemodule)) {
         echo get_string('reportfailnocm', 'plagiarism_drillbit');
         exit(0);
     }
-    $rolenames = ['student', 'editingteacher'];
-    $context = context_course::instance($coursemodule->course);
-    $roles = get_user_roles($context, $USER->id, true);
-    $enrolled = is_enrolled($context, $USER->id, '', true);
 
-    $validrole = false;
-    foreach ($roles as $role) {
-        if (in_array($role->shortname, $rolenames)) {
-            $validrole = true;
-            break;
+    $modulecontext = context_module::instance($cm);
+    $hascapability = has_capability('plagiarism/drillbit:viewfullreport', $modulecontext);
+    $modconfig = plagiarism_drillbit_get_cm_settings($cm);
+    $pluginsettings = plagiarism_drillbit_get_plugin_global_settings();
+    $cmsettingsforstudent = false;
+    $pluginsettingsforstudent = false;
+
+    if (isset($modconfig["plagiarism_show_student_reports"])) {
+        $cmsettingsforstudent = (int)$modconfig["plagiarism_show_student_reports"];
+    }
+
+    if (isset($pluginsettings["plagiarism_show_student_reports"])) {
+        $pluginsettingsforstudent = (int)$pluginsettings["plagiarism_show_student_reports"];
+    }
+
+    if ($hascapability) {
+        return true;
+    } else if ($USER->id == $reportfileuser) {
+        $cmcanviewstudent = false;
+        $canviewhisown = false;
+        if (!empty($modconfig) && $cmsettingsforstudent) {
+            $canviewhisown = true;
+        } else if (!empty($pluginsettings) && $pluginsettingsforstudent) {
+            if (!$cmcanviewstudent && !empty($modconfig)) {
+                $canviewhisown = false;
+            } else {
+                $canviewhisown = true;
+            }
         }
+        return $canviewhisown;
+    } else {
+        return false;
     }
 
-    $hasaccess = false;
-
-    if ($enrolled && $validrole) {
-        $hasaccess = true;
-    }
-
-    if (is_siteadmin()) {
-        $hasaccess = true;
-    }
-
-    return $hasaccess;
-
+    return $hascapability;
 }
