@@ -35,7 +35,6 @@ if ($paperid != null) {
         $drillbitfile = $DB->get_record("plagiarism_drillbit_files", array("submissionid" => $paperid));
         if ($drillbitfile) {
             $hasaccess = plagiarism_drillbit_has_access_to_view_report($drillbitfile->cm, $drillbitfile->userid);
-            // print_r(json_encode($hasaccess));exit;
             if (!$hasaccess) {
                 echo get_string('reportfailnoaccess', 'plagiarism_drillbit');
                 exit(0);

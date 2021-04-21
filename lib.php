@@ -227,6 +227,12 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                 return $output;
             }
 
+            $canprintreport = plagiarism_drillbit_has_access_to_view_report($linkarray["cmid"], $linkarray["userid"]);
+
+            if (!$canprintreport) {
+                return $output;
+            }
+
             if ($plagiarismfile->statuscode == 'queued') {
                 $statusstr =
                 get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('queued', 'plagiarism_drillbit');
@@ -332,7 +338,6 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         $plagiarismfile->submissiontype = $submissiontype;
 
         if (!$fileid = $DB->insert_record('plagiarism_drillbit_files', $plagiarismfile)) {
-            // plagiarism_drillbit_activitylog("Insert record failed (CM: ".$cm->id.", User: ".$userid.")", "PP_NEW_SUB");
             $fileid = 0;
         }
 
@@ -372,7 +377,6 @@ function plagiarism_drillbit_coursemodule_standard_elements($formwrapper, $mform
 
         if ($PAGE->pagetype != 'course-editbulkcompletion' && $PAGE->pagetype != 'course-editdefaultcompletion') {
             // Create/Edit course in drillbit and join user to class.
-            // $course = $this->get_course_data($cmid, $COURSE->id);
             $drillbitview->add_elements_to_settings_form($mform, "", "activity", "", $cmid);
         }
     }
@@ -452,7 +456,6 @@ function plagiarism_drillbit_send_queued_submissions() {
                 $file = $fs->get_file_by_hash($queueditem->identifier);
 
                 if (!$file) {
-                    // plagiarism_drillbit_activitylog('File not found for submission: '.$queueditem->id, 'PP_NO_FILE');
                     mtrace('File not found for submission. Identifier: ' . $queueditem->id);
                     $errorcode = 9;
                 }
