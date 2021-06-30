@@ -383,6 +383,9 @@ function plagiarism_drillbit_coursemodule_standard_elements($formwrapper, $mform
 }
 
 function plagiarism_drillbit_coursemodule_edit_post_actions($data, $course) {
+    if(empty($data)) {
+        return;
+    }
     $showstudreports = $data->plagiarism_show_student_reports;
     $exrefval = $data->plagiarism_exclude_references;
     $exquoteval = $data->plagiarism_exclude_quotes;
@@ -407,6 +410,9 @@ function plagiarism_drillbit_coursemodule_edit_post_actions($data, $course) {
 
 function plagiarism_drillbit_update_cm_post_actions($name, $value, $hash, $cm) {
     global $DB;
+    if(empty($name) || empty($value)) {
+        return;
+    }
     $update = $DB->get_record('drillbit_plugin_config', ['config_hash' => $hash]);
 
     if ($update) {
