@@ -18,7 +18,7 @@
  * Plugin setup form for plagiarism_drillbit component
  *
  * @package   plagiarism_drillbit
- * @copyright 2018 Drillbit
+ * @copyright 2021 Drillbit
  * @author    Kavimukil <kavimukil.a@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -80,13 +80,6 @@ class plagiarism_drillbit_setup_form extends moodleform {
             'https://www.drillbitplagiarismcheck.com' => 'https://www.drillbitplagiarismcheck.com',
             'https://api.drillbit.com' => 'https://api.drillbit.com',
         );
-
-        // Set $CFG->turnitinqa and add URLs to $CFG->turnitinqaurls array in config.php file for testing other environments.
-        if (!empty($CFG->turnitinqa)) {
-            foreach ($CFG->turnitinqaurls as $url) {
-                $options[$url] = $url;
-            }
-        }
 
         $mform->addElement('select', 'plagiarism_drillbit_apiurl', get_string('drillbitapiurl', 'plagiarism_drillbit'), $options);
 

@@ -18,7 +18,8 @@
  * Update report Scores from drillbit.
  *
  * @package    plagiarism_drillbit
- * @author     John McGettrick http://www.drillbit.com
+ * @copyright  2021 drillbit
+ * @author     Kavimukil <kavimukil.a@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

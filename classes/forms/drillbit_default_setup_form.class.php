@@ -18,8 +18,8 @@
  * Plugin setup form for plagiarism_drillbit component
  *
  * @package   plagiarism_drillbit
- * @copyright 2018 drillbit
- * @author    David Winn <dwinn@drillbit.com>
+ * @copyright 2021 drillbit
+ * @author    Kavimukil <kavimukil.a@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
