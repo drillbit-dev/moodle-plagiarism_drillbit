@@ -18,8 +18,8 @@
  * Send queued submissions to drillbit.
  *
  * @package    plagiarism_drillbit
- * @copyright  2021 drillbit
- * @author     kavimukil <kavimukil.a@gmail.com>
+ * @copyright  2021 Drillbit
+ * @author     Kavimukil <kavimukil.a@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
