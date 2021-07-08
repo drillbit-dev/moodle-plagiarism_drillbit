@@ -39,7 +39,7 @@ class plagiarism_drillbit_view{
 
     public function add_elements_to_settings_form($mform, $course,
     $location = "activity", $modulename = "", $cmid = 0, $currentrubric = 0) {
-        if ($location == "activity" && $modulename != 'mod_forum') {
+        if ($location == "activity" && $modulename === 'assign') {
             $cmconfig = null;
             if ($cmid > 0) {
                 $cmconfig = plagiarism_drillbit_get_cm_settings($cmid);

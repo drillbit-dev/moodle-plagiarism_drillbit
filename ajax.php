@@ -22,7 +22,6 @@
 require_once(__DIR__ . '/../../config.php');
 
 require_once(__DIR__ . '/lib.php');
-
 require_login();
 header("Content-Type: application/json; charset=UTF-8");
 
@@ -48,4 +47,9 @@ if ($method === "external") {
     $status["status"] = false;
     $status["message"] = "No method specified";
     echo json_encode($status);
+}
+
+function drillbit_sandbox() {
+    // Call lib functions for debugging.
+    exit;
 }
