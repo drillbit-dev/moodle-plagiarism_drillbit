@@ -42,24 +42,12 @@ $settingsform = new plagiarism_drillbit_setup_form();
 if ($settingsform->is_cancelled()) {
     redirect($CFG->wwwroot . '/admin/category.php?category=plagiarism', 'No changes Done.');
 } else if ($settingsformdata = $settingsform->get_data()) {
-
-    foreach ($settingsformdata as $field => $value) {
-        $DB->delete_records("config_plugins", array("name" => $field));
-    }
-
-    $DB->delete_records("config_plugins", array("plugin" => "plagiarism_drillbit", "name" => "jwt"));
-    $DB->delete_records("config_plugins", array("plugin" => "plagiarism_drillbit", "name" => "enabled"));
-
     $email = "";
     $pass = "";
     $apikey = "";
     $folderid = "";
 
     foreach ($settingsformdata as $field => $value) {
-        $drillbitconfigfield = new stdClass();
-        $drillbitconfigfield->value = $value;
-        $drillbitconfigfield->plugin = 'plagiarism_drillbit';
-        $drillbitconfigfield->name = $field;
 
         if ($field == "plagiarism_drillbit_emailid") {
             $email = $value;
@@ -68,6 +56,7 @@ if ($settingsform->is_cancelled()) {
         if ($field == "plagiarism_drillbit_password") {
             $pass = $value;
         }
+
         if ($field == "plagiarism_drillbit_folderid") {
             $folderid = $value;
         }
@@ -76,30 +65,13 @@ if ($settingsform->is_cancelled()) {
             $apikey = $value;
         }
 
-        if (!$DB->insert_record('config_plugins', $drillbitconfigfield)) {
-            mtrace("errorinserting");
-        }
+        set_config($field, $value, "plagiarism_drillbit");
     }
 
     $jwt = plagiarism_drillbit_get_login_token($email, $pass, $folderid, $apikey);
 
-    $drillbitconfigfield = new stdClass();
-    $drillbitconfigfield->value = $jwt;
-    $drillbitconfigfield->plugin = 'plagiarism_drillbit';
-    $drillbitconfigfield->name = "jwt";
-
-    $drillbitenable = new stdClass();
-    $drillbitenable->value = 1;
-    $drillbitenable->plugin = 'plagiarism_drillbit';
-    $drillbitenable->name = "enabled";
-
-    if (!$DB->insert_record('config_plugins', $drillbitconfigfield)) {
-        mtrace("errorinserting");
-    }
-
-    if (!$DB->insert_record('config_plugins', $drillbitenable)) {
-        mtrace("errorinserting");
-    }
+    set_config("jwt", $jwt, "plagiarism_drillbit");
+    set_config("enabled", 1, "plagiarism_drillbit");
 
     $output = $OUTPUT->notification(get_string('configsavesuccess', 'plagiarism_drillbit'), 'notifysuccess');
 }

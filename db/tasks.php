@@ -29,7 +29,7 @@ $tasks = array(
     array(
         'classname' => 'plagiarism_drillbit\task\update_reports',
         'blocking' => 0,
-        'minute' => '*/1',
+        'minute' => '*/5',
         'hour' => '*',
         'day' => '*',
         'dayofweek' => '*',
@@ -38,7 +38,7 @@ $tasks = array(
     array(
         'classname' => 'plagiarism_drillbit\task\send_submissions',
         'blocking' => 0,
-        'minute' => '*/1',
+        'minute' => '*/5',
         'hour' => '*',
         'day' => '*',
         'dayofweek' => '*',

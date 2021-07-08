@@ -447,10 +447,8 @@ function plagiarism_drillbit_send_queued_submissions() {
             PLAGIARISM_DRILLBIT_CRON_SUBMISSIONS_LIMIT
         );
 
-        $folderid = $DB->get_record("config_plugins",
-        array("plugin" => "plagiarism_drillbit", "name" => "plagiarism_drillbit_folderid"));
-        $jwt = $DB->get_record("config_plugins",
-        array("plugin" => "plagiarism_drillbit", "name" => "jwt"));
+        $folderid = get_config("plagiarism_drillbit", "plagiarism_drillbit_folderid");
+        $jwt = get_config("plagiarism_drillbit", "jwt");
 
         foreach ($queueditems as $queueditem) {
             $errorcode = 0;
@@ -533,7 +531,7 @@ function plagiarism_drillbit_update_reports() {
             $errorcode = 0;
             $cm = get_coursemodule_from_id('', $queueditem->cm);
             $callback = $queueditem->callback_url;
-            $jwt = $DB->get_record("config_plugins", array("plugin" => "plagiarism_drillbit", "name" => "jwt"));
+            $jwt = get_config("plagiarism_drillbit", "jwt");
             $headers = array("Authorization: Bearer $jwt->value", "Accept: application/json");
 
             $request = plagiarism_drillbit_call_external_api("GET", $callback, false, $headers);
@@ -627,7 +625,7 @@ function plagiarism_drillbit_update_expired_jwt_token() {
         }
     }
 
-    $pluginsettings = $DB->get_records("config_plugins", array("plugin" => "plagiarism_drillbit"));
+    $pluginsettings = (array)get_config("plagiarism_drillbit");
 
     $toupdate = 0;
     foreach ($pluginsettings as $field => $value) {
@@ -655,16 +653,17 @@ function plagiarism_drillbit_update_expired_jwt_token() {
     if (empty($email) || empty($password) || empty($apikey) || empty($folderid)) {
         $resultcode = 0;
     }
+
     $token = plagiarism_drillbit_get_login_token($email, $password, $folderid, $apikey);
     if ($token != null) {
         $resultcode = 1;
     }
 
     if ($resultcode) {
-        $updatejwt = new stdClass();
-        $updatejwt->id = $toupdate;
-        $updatejwt->value = $token;
-        $DB->update_record("config_plugins", $updatejwt);
+        set_config("plagiarism_drillbit_apikey", $apikey, "plagiarism_drillbit");
+        set_config("plagiarism_drillbit_emailid", $email, "plagiarism_drillbit");
+        set_config("plagiarism_drillbit_folderid", $folderid, "plagiarism_drillbit");
+        set_config("plagiarism_drillbit_password", $password, "plagiarism_drillbit");
     }
 
     return $resultcode;
@@ -672,7 +671,7 @@ function plagiarism_drillbit_update_expired_jwt_token() {
 
 function plagiarism_drillbit_get_existing_jwt_token() {
     global $DB;
-    $jwt = $DB->get_record("config_plugins", array("plugin" => "plagiarism_drillbit", "name" => "jwt"));
+    $jwt = get_config("plagiarism_drillbit", "jwt");
 
     if ($jwt->value) {
         return $jwt->value;
@@ -781,9 +780,9 @@ function plagiarism_drillbit_get_cm_settings($cmid) {
 
 function plagiarism_drillbit_get_plugin_global_settings() {
     global $DB;
-    $data = $DB->get_records('config_plugins', ['plugin' => 'plagiarism_drillbit']);
+    $drillbitpluginsettings = (array)get_config('plagiarism_drillbit');
     $pluginsettings = [];
-    foreach ($data as $key => $value) {
+    foreach ($drillbitpluginsettings as $key => $value) {
         $pluginsettings[$value->name] = $value->value;
     }
     return $pluginsettings;

@@ -38,12 +38,11 @@ class update_reports extends \core\task\scheduled_task
     }
 
     public function execute() {
-        global $CFG, $pptaskcall;
+        global $CFG;
 
         // Call plagiarism drillbit cron function to update report scores.
         mtrace("Drillbit Report Update Started.....");
         require_once($CFG->dirroot . '/plagiarism/drillbit/lib.php');
-        $pptaskcall = true;
         plagiarism_drillbit_update_reports();
         mtrace("Drillbit Report Update Ended.....");
     }
