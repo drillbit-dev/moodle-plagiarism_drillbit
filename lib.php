@@ -134,7 +134,6 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
 
     public function get_links($linkarray) {
         global $CFG, $DB, $OUTPUT, $USER;
-
         $output = "";
 
         // Don't show links for certain file types as they won't have been submitted to drillbit.
@@ -157,6 +156,11 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                     print_error('invalidforumid', 'forum');
                 }
             }
+        }
+
+        $ismoduleallowed = $this->get_allowed_modules_for_drillbit($cm->modname);
+        if (!$ismoduleallowed) {
+            return;
         }
 
         static $moduledata;
@@ -313,6 +317,11 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
 
     public function get_file_results($cmid, $userid, $file) {
         return array('analyzed' => '', 'score' => '', 'reporturl' => '');
+    }
+
+    public function get_allowed_modules_for_drillbit($module) {
+        $modules = ['assign', 'quiz'];
+        return in_array($module, $modules);
     }
 
     public function event_handler($eventdata) {
