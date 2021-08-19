@@ -290,7 +290,7 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                     get_string('vwreport', 'plagiarism_drillbit'),
                     array(
                         'class' => 'drillbit_report_link',
-                        'href' => '/plagiarism/drillbit/report_file.php?paper_id=' . $plagiarismfile->submissionid,
+                        'href' => '../../plagiarism/drillbit/report_file.php?paper_id=' . $plagiarismfile->submissionid,
                         'target' => '_blank'
                     )
                 );

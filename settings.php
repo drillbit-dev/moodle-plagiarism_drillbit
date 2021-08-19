@@ -105,7 +105,7 @@ $settingsform->display();
 
         $.ajax({
             type: "POST",
-            url: "/plagiarism/drillbit/ajax.php?method=external",
+            url: "ajax.php?method=external",
             //dataType: 'json',
             //contentType: 'application/json',
             data: {
