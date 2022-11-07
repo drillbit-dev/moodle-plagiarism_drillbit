@@ -33,6 +33,7 @@ if ($paperid != null) {
     if ($resultcode) {
         global $DB;
         $drillbitfile = $DB->get_record("plagiarism_drillbit_files", array("submissionid" => $paperid));
+        //print_r($drillbitfile);exit;
         if ($drillbitfile) {
             $hasaccess = plagiarism_drillbit_has_access_to_view_report($drillbitfile->cm, $drillbitfile->userid);
             if (!$hasaccess) {
@@ -45,7 +46,15 @@ if ($paperid != null) {
                 "Authorization: Bearer $jwt"
             );
 
-            $response = plagiarism_drillbit_call_external_api("GET", $drillbitfile->download_url, false, $headers);
+            $reportdownlink = get_report_download_uri($paperid, $drillbitfile->dkey);
+
+
+            if(empty($reportdownlink)) {
+                echo "<center><h3>Unable to get relevant submission report. Please contact Administrator.</h3></center>";
+                exit(0);
+            }
+            
+            $response = plagiarism_drillbit_call_external_api("GET", $reportdownlink, false, $headers);
             header('Content-Description: File Transfer');
             header('Content-Type: application/pdf');
             header('Content-Disposition: inline; filename=' . $paperid . '_' . microtime() . '.pdf');
@@ -67,5 +76,3 @@ if ($paperid != null) {
     echo get_string('reportfailgeneric', 'plagiarism_drillbit');
     exit();
 }
-
-

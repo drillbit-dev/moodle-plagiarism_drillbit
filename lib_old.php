@@ -52,7 +52,8 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
      *
      * @return array of settings fields.
      */
-    public function get_settings_fields() {
+    public function get_settings_fields()
+    {
         return array(
             'use_drillbit', 'plagiarism_show_student_report', 'plagiarism_draft_submit',
             'plagiarism_allow_non_or_submissions', 'plagiarism_submitpapersto', 'plagiarism_compare_student_papers',
@@ -70,7 +71,8 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
      *
      * @return mixed if plugin is enabled then an array of config settings is returned or false if not
      */
-    public static function get_config_settings($modulename) {
+    public static function get_config_settings($modulename)
+    {
         $pluginconfig = get_config('plagiarism_drillbit', 'plagiarism_drillbit_' . $modulename);
         return $pluginconfig;
     }
@@ -78,7 +80,8 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
     /**
      * @return mixed the admin config settings for the plugin
      */
-    public static function plagiarism_drillbit_admin_config() {
+    public static function plagiarism_drillbit_admin_config()
+    {
         return get_config('plagiarism_drillbit');
     }
 
@@ -89,7 +92,8 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
      * @param bool $uselockedvalues - use locked values in place of saved values
      * @return array of drillbit settings for a module
      */
-    public function get_settings($cmid = null, $uselockedvalues = true) {
+    public function get_settings($cmid = null, $uselockedvalues = true)
+    {
         global $DB;
         $defaults = $DB->get_records_menu('drillbit_plugin_config', array('cm' => null),     '', 'name,value');
         $settings = $DB->get_records_menu('drillbit_plugin_config', array('cm' => $cmid), '', 'name,value');
@@ -114,7 +118,8 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         return $settings;
     }
 
-    public function is_plugin_configured() {
+    public function is_plugin_configured()
+    {
         $config = $this->plagiarism_drillbit_admin_config();
 
         if (
@@ -128,11 +133,13 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         return true;
     }
 
-    public function get_configs() {
+    public function get_configs()
+    {
         return array();
     }
 
-    public function get_links($linkarray) {
+    public function get_links($linkarray)
+    {
         global $CFG, $DB, $OUTPUT, $USER;
         $output = "";
 
@@ -315,16 +322,19 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         return $output;
     }
 
-    public function get_file_results($cmid, $userid, $file) {
+    public function get_file_results($cmid, $userid, $file)
+    {
         return array('analyzed' => '', 'score' => '', 'reporturl' => '');
     }
 
-    public function get_allowed_modules_for_drillbit($module) {
+    public function get_allowed_modules_for_drillbit($module)
+    {
         $modules = ['assign', 'quiz'];
         return in_array($module, $modules);
     }
 
-    public function event_handler($eventdata) {
+    public function event_handler($eventdata)
+    {
         global $DB, $CFG;
         $result = true;
         $cm = $eventdata["contextinstanceid"];
@@ -352,7 +362,8 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         return $result;
     }
 
-    private function drillbit_create_new_submission($cm, $userid, $identifier, $submissiontype, $itemid = 0) {
+    private function drillbit_create_new_submission($cm, $userid, $identifier, $submissiontype, $itemid = 0)
+    {
         global $DB;
 
         $plagiarismfile = new stdClass();
@@ -373,19 +384,23 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         return $fileid;
     }
 
-    public function is_tutor($context) {
+    public function is_tutor($context)
+    {
         return has_capability($this->get_tutor_capability(), $context);
     }
 
-    public function get_tutor_capability() {
+    public function get_tutor_capability()
+    {
         return 'mod/' . 'assign' . ':grade';
     }
 
-    public function user_enrolled_on_course($context, $userid) {
+    public function user_enrolled_on_course($context, $userid)
+    {
         return has_capability('mod/' . $this->modname . ':submit', $context, $userid);
     }
 
-    public function get_author($itemid) {
+    public function get_author($itemid)
+    {
         global $DB;
 
         if ($submission = $DB->get_record('assign_submission', array('id' => $itemid), 'userid')) {
@@ -396,7 +411,8 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
     }
 }
 
-function plagiarism_drillbit_coursemodule_standard_elements($formwrapper, $mform) {
+function plagiarism_drillbit_coursemodule_standard_elements($formwrapper, $mform)
+{
     if (is_drillbit_pulgin_enabled()) {
         $modulename = $formwrapper->get_current()->modulename;
         if ($modulename == 'assign') {
@@ -412,7 +428,8 @@ function plagiarism_drillbit_coursemodule_standard_elements($formwrapper, $mform
     }
 }
 
-function plagiarism_drillbit_coursemodule_edit_post_actions($data, $course) {
+function plagiarism_drillbit_coursemodule_edit_post_actions($data, $course)
+{
     if (empty($data)) {
         return;
     }
@@ -453,18 +470,16 @@ function plagiarism_drillbit_coursemodule_edit_post_actions($data, $course) {
             );
         }
     }
-
-    return $data;
 }
 
-function plagiarism_drillbit_update_cm_post_actions($name, $value, $hash, $cm) {
+function plagiarism_drillbit_update_cm_post_actions($name, $value, $hash, $cm)
+{
     global $DB;
 
     if (empty($name)) {
         return;
     }
 
-    //dd([$hash, $cm, $name, $value]);
     $update = $DB->get_record('drillbit_plugin_config', ['config_hash' => $hash]);
     if ($update) {
         $toupdate = new stdClass();
@@ -482,7 +497,8 @@ function plagiarism_drillbit_update_cm_post_actions($name, $value, $hash, $cm) {
 }
 
 
-function plagiarism_drillbit_send_queued_submissions() {
+function plagiarism_drillbit_send_queued_submissions()
+{
 
     $resultcode = plagiarism_drillbit_update_expired_jwt_token();
     if ($resultcode) {
@@ -535,21 +551,21 @@ function plagiarism_drillbit_send_queued_submissions() {
                 }
 
                 $postdata = array();
-                $postdata["authorName"] = $USER->email;
+                $postdata["name"] = $filename;
                 $postdata["title"] = $cm->name;
-                //$postdata["assignment_id"] = $folderid;
-                $postdata["documentType"] = "thesis";
+                $postdata["assignment_id"] = $folderid;
+                $postdata["doc_type"] = "thesis";
 
                 if (!empty($modconfig)) {
-                    $postdata["ex_ref"] = $modconfig["plagiarism_exclude_references"] == "1" ? "yes" : "no";
-                    $postdata["ex_qts"] = $modconfig["plagiarism_exclude_quotes"] == "1" ? "yes" : "no";
-                    $postdata["ex_ss"] = $modconfig["plagiarism_exclude_smallsources"] == "1" ? "yes" : "no";
+                    $postdata["exclude_refernces"] = $modconfig["plagiarism_exclude_references"];
+                    $postdata["exclude_quotes"] = $modconfig["plagiarism_exclude_quotes"];
+                    $postdata["exclude_small_sources"] = $modconfig["plagiarism_exclude_smallsources"];
                 }
 
                 $postdata["file"] = curl_file_create($tempfile, $mime, $filename);
 
                 $headers = plagiarism_drillbit_get_file_headers($jwt);
-                $url = "https://s1.drillbitplagiarismcheck.com/files/moodle/upload";
+                $url = "https://www.drillbitplagiarismcheck.com/drillbit_new/api/submission";
 
                 $request = plagiarism_drillbit_call_external_api("POST", $url, $postdata, $headers);
 
@@ -563,7 +579,8 @@ function plagiarism_drillbit_send_queued_submissions() {
 
 
 
-function plagiarism_drillbit_update_reports() {
+function plagiarism_drillbit_update_reports()
+{
     global $DB;
     $resultcode = plagiarism_drillbit_update_expired_jwt_token();
     if ($resultcode) {
@@ -593,7 +610,8 @@ function plagiarism_drillbit_update_reports() {
     }
 }
 
-function plagiarism_drillbit_has_access_to_view_report($cm, $reportfileuser) {
+function plagiarism_drillbit_has_access_to_view_report($cm, $reportfileuser)
+{
     global $USER;
     $coursemodule = get_coursemodule_from_id('assign', $cm);
 
@@ -639,7 +657,8 @@ function plagiarism_drillbit_has_access_to_view_report($cm, $reportfileuser) {
     return $hascapability;
 }
 
-function plagiarism_drillbit_get_file_headers($authtoken) {
+function plagiarism_drillbit_get_file_headers($authtoken)
+{
     $headers = array(
         "Authorization: Bearer $authtoken",
         'Content-type: multipart/form-data'
@@ -648,7 +667,8 @@ function plagiarism_drillbit_get_file_headers($authtoken) {
     return $headers;
 }
 
-function plagiarism_drillbit_update_expired_jwt_token() {
+function plagiarism_drillbit_update_expired_jwt_token()
+{
     global $DB;
     $resultcode = 0;
     $email = "";
@@ -698,35 +718,38 @@ function plagiarism_drillbit_update_expired_jwt_token() {
     return $resultcode;
 }
 
-function plagiarism_drillbit_get_existing_jwt_token() {
+function plagiarism_drillbit_get_existing_jwt_token()
+{
     global $DB;
     $jwt = get_config("plagiarism_drillbit", "jwt");
     return $jwt;
 }
 
-function plagiarism_drillbit_get_login_token($email, $pass, $folderid, $apikey) {
+function plagiarism_drillbit_get_login_token($email, $pass, $folderid, $apikey)
+{
     $loginparams = array();
     $loginparams["username"] = $email;
     $loginparams["password"] = $pass;
     $loginparams["api_key"] = $apikey;
-    //$loginparams["submissions_key"] = $folderid;
+    $loginparams["submissions_key"] = $folderid;
 
     $jsonrequest = json_encode($loginparams);
 
-    $url = "https://s1.drillbitplagiarismcheck.com/authentication/authenticate/moodle";
+    $url = "https://www.drillbitplagiarismcheck.com/drillbit_new/api/authenticate/moodle";
 
     $request = plagiarism_drillbit_call_external_api("POST", $url, $jsonrequest);
 
     $response = json_decode($request);
 
-    if (isset($response->token)) {
-        return $response->token;
-    } 
-
-    return null;
+    if (isset($response->jwt)) {
+        return $response->jwt;
+    } else {
+        return null;
+    }
 }
 
-function plagiarism_drillbit_call_external_api($method, $url, $data = false, $headers = array("content-type:application/json")) {
+function plagiarism_drillbit_call_external_api($method, $url, $data = false, $headers = array("content-type:application/json"))
+{
     $curl = new curl(array('proxy' => true));
     $curloptions = array();
     $curloptions['CURLOPT_RETURNTRANSFER'] = 1;
@@ -735,7 +758,6 @@ function plagiarism_drillbit_call_external_api($method, $url, $data = false, $he
 
     $curl->setHeader($headers);
     $curl->setopt($curloptions);
-    
 
     $result = null;
     switch ($method) {
@@ -752,7 +774,9 @@ function plagiarism_drillbit_call_external_api($method, $url, $data = false, $he
     return $result;
 }
 
-function plagiarism_drillbit_tempfile($filename, $suffix) {
+
+function plagiarism_drillbit_tempfile($filename, $suffix)
+{
     $filename = str_replace(' ', '_', $filename);
     $filename = clean_param(strip_tags($filename), PARAM_FILE);
 
@@ -792,7 +816,8 @@ function plagiarism_drillbit_tempfile($filename, $suffix) {
     return $file;
 }
 
-function plagiarism_drillbit_get_cm_settings($cmid) {
+function plagiarism_drillbit_get_cm_settings($cmid)
+{
     global $DB;
     $data = $DB->get_records('drillbit_plugin_config', ['cm' => $cmid]);
     $modsettings = [];
@@ -802,23 +827,22 @@ function plagiarism_drillbit_get_cm_settings($cmid) {
     return $modsettings;
 }
 
-function plagiarism_drillbit_get_plugin_global_settings() {
+function plagiarism_drillbit_get_plugin_global_settings()
+{
     global $DB;
     $drillbitpluginsettings = (array)get_config('plagiarism_drillbit');
     return $drillbitpluginsettings;
 }
 
-function is_drillbit_pulgin_enabled() {
+function is_drillbit_pulgin_enabled()
+{
     return get_config("plagiarism_drillbit", "enabled");
 }
 
-function plagiarism_drillbit_update_submissions($response, $fileid) {
+function plagiarism_drillbit_update_submissions($response, $fileid)
+{
     global $DB;
     $responseobj = json_decode($response, true);
-
-    if(isset($responseobj["submissions"])) {
-        $responseobj = $responseobj["submissions"];
-    }
 
     if (isset($responseobj["paper_id"])) {
         mtrace("Updating Submission Response. Received paper id : " . $responseobj["paper_id"]);
@@ -853,17 +877,4 @@ function plagiarism_drillbit_update_submissions($response, $fileid) {
             mtrace("Received Status: " . $responseobj["status"] . "Error: " . $responseobj["message"]);
         }
     }
-}
-
-function get_report_download_uri($paperid, $dkey) {
-    return "https://s1.drillbitplagiarismcheck.com/extreme/moodle/submission/$paperid/$dkey/download";
-}
-
-function dd($obj, $json = false) {
-    if(!$json) {
-        echo "<pre/>";
-    }
-
-    print_r($obj);
-    exit(0);
 }

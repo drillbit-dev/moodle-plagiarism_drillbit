@@ -37,7 +37,7 @@ $data = required_param("data", PARAM_RAW);
 
 if ($method === "external") {
     $datatopost = $data;
-    $url = "https://www.drillbitplagiarismcheck.com/drillbit_new/api/authenticate/moodle";
+    $url = "https://s1.drillbitplagiarismcheck.com/authentication/authenticate/moodle";
     if ($datatopost) {
         $result = plagiarism_drillbit_call_external_api("POST", $url, $datatopost, array("content-type:application/json"));
         echo $result;

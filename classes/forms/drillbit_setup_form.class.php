@@ -68,17 +68,16 @@ class plagiarism_drillbit_setup_form extends moodleform {
         $mform->addElement('passwordunmask', 'plagiarism_drillbit_password',
         get_string('drillbitpassword', 'plagiarism_drillbit'));
 
-        $mform->addElement('text', 'plagiarism_drillbit_folderid',
-        get_string('drillbitfolderid', 'plagiarism_drillbit'));
-        $mform->setType('plagiarism_drillbit_folderid', PARAM_TEXT);
+        // $mform->addElement('text', 'plagiarism_drillbit_folderid',
+        // get_string('drillbitfolderid', 'plagiarism_drillbit'));
+        // $mform->setType('plagiarism_drillbit_folderid', PARAM_TEXT);
 
         $mform->addElement('text', 'plagiarism_drillbit_apikey',
         get_string('drillbitapikey', 'plagiarism_drillbit'));
         $mform->setType('plagiarism_drillbit_apikey', PARAM_TEXT);
 
         $options = array(
-            'https://www.drillbitplagiarismcheck.com' => 'https://www.drillbitplagiarismcheck.com',
-            'https://api.drillbit.com' => 'https://api.drillbit.com',
+            'https://s1.drillbitplagiarismcheck.com' => 'https://s1.drillbitplagiarismcheck.com',
         );
 
         $mform->addElement('select', 'plagiarism_drillbit_apiurl', get_string('drillbitapiurl', 'plagiarism_drillbit'), $options);

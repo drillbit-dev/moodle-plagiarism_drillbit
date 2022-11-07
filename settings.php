@@ -112,18 +112,21 @@ $settingsform->display();
                 data: form_data_json
             },
             success: function(data) {
-                if (data["jwt"]) {
-                    var token = data["jwt"];
+                if (data["token"]) {
+                    var token = data["token"];
                     var html = "<b>" + <?php echo json_encode(get_string('connsuccess', 'plagiarism_drillbit')); ?>;
                     html += "</b><br/><p>Access Token => " + token + "</p>";
 
                     $('#api_conn_result').html(html);
-                } else if (data["status"]) {
+                } else if (data["status"] && data["status"] == 400) {
                     var html = "<b>" + <?php echo json_encode(get_string('connfail', 'plagiarism_drillbit')); ?>;
                     html += "</b><br/><p>Error => " + data["message"] + "</p>";
                     $('#api_conn_result').html(data);
+                } else {
+                    var html = "<b>" + <?php echo json_encode(get_string('connfail', 'plagiarism_drillbit')); ?>;
+                    html += "</b><br/><p>Error => " + "Unknown error occured" + "</p>";
+                    $('#api_conn_result').html(data);
                 }
-
             },
             error: function(err) {
                 console.log(err);
