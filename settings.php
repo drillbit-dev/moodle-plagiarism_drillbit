@@ -68,7 +68,7 @@ if ($settingsform->is_cancelled()) {
         set_config($field, $value, "plagiarism_drillbit");
     }
 
-    $jwt = plagiarism_drillbit_get_login_token($email, $pass, $folderid, $apikey);
+    $jwt = plagiarism_drillbit_get_login_token($email, $pass, $apikey);
 
     set_config("jwt", $jwt, "plagiarism_drillbit");
     set_config("enabled", 1, "plagiarism_drillbit");
