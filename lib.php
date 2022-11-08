@@ -581,6 +581,13 @@ function plagiarism_drillbit_update_reports() {
             $errorcode = 0;
             $cm = get_coursemodule_from_id('', $queueditem->cm);
             $callback = $queueditem->callback_url;
+
+            if(empty($callback)) {
+                mtrace("Callback url is empty. Forming callback url with known params.");
+                $paperid = $queueditem->submissionid;
+                $callback = "https://s1.drillbitplagiarismcheck.com/extreme/moodle/submission/$paperid";
+            }
+            
             $jwt = get_config("plagiarism_drillbit", "jwt");
             $headers = array("Authorization: Bearer $jwt", "Accept: application/json");
 
@@ -682,11 +689,11 @@ function plagiarism_drillbit_update_expired_jwt_token() {
     $folderid = $pluginsettings["plagiarism_drillbit_folderid"];
     $password = $pluginsettings["plagiarism_drillbit_password"];
 
-    if (empty($email) || empty($password) || empty($apikey) || empty($folderid)) {
+    if (empty($email) || empty($password) || empty($apikey)) {
         $resultcode = 0;
     }
 
-    $token = plagiarism_drillbit_get_login_token($email, $password, $folderid, $apikey);
+    $token = plagiarism_drillbit_get_login_token($email, $password, $apikey);
     if ($token != null) {
         $resultcode = 1;
     }
