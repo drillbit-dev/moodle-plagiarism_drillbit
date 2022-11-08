@@ -711,7 +711,7 @@ function plagiarism_drillbit_get_existing_jwt_token() {
     return $jwt;
 }
 
-function plagiarism_drillbit_get_login_token($email, $pass, $folderid, $apikey) {
+function plagiarism_drillbit_get_login_token($email, $pass, $apikey) {
     $loginparams = array();
     $loginparams["username"] = $email;
     $loginparams["password"] = $pass;
