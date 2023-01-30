@@ -512,6 +512,7 @@ function plagiarism_drillbit_send_queued_submissions() {
                 if (!$file) {
                     mtrace('File not found for submission. Identifier: ' . $queueditem->id);
                     $errorcode = 9;
+                    continue;
                 }
 
                 $title = $file->get_filename();
