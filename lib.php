@@ -396,6 +396,16 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
     }
 }
 
+function get_email_by_user_id($userid) {
+    global $DB;
+
+    if ($submission = $DB->get_record('user', array('id' => $userid), 'email')) {
+        return $submission->email;
+    } else {
+        return 0;
+    }
+}
+
 function plagiarism_drillbit_coursemodule_standard_elements($formwrapper, $mform) {
     if (is_drillbit_pulgin_enabled()) {
         $modulename = $formwrapper->get_current()->modulename;
@@ -532,11 +542,11 @@ function plagiarism_drillbit_send_queued_submissions() {
                 }
 
                 if (!$tempfile) {
-                    return;
+                    continue;
                 }
 
                 $postdata = array();
-                $postdata["authorName"] = $USER->email;
+                $postdata["authorName"] = get_email_by_user_id($queueditem->userid);
                 $postdata["title"] = $cm->name;
                 //$postdata["assignment_id"] = $folderid;
                 $postdata["documentType"] = "thesis";
@@ -548,11 +558,10 @@ function plagiarism_drillbit_send_queued_submissions() {
                 }
 
                 $postdata["file"] = curl_file_create($tempfile, $mime, $filename);
-
                 $headers = plagiarism_drillbit_get_file_headers($jwt);
                 $url = "https://s1.drillbitplagiarismcheck.com/files/moodle/upload";
-
                 $request = plagiarism_drillbit_call_external_api("POST", $url, $postdata, $headers);
+                //print_r($request);exit;
 
                 plagiarism_drillbit_update_submissions($request, $queueditem->id);
             }
