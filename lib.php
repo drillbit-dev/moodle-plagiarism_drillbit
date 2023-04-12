@@ -561,6 +561,9 @@ function plagiarism_drillbit_send_queued_submissions() {
                 $headers = plagiarism_drillbit_get_file_headers($jwt);
                 $url = "https://s1.drillbitplagiarismcheck.com/files/moodle/upload";
                 $request = plagiarism_drillbit_call_external_api("POST", $url, $postdata, $headers);
+                if($tempfile) {
+                    unlink($tempfile);
+                }
                 //print_r($request);exit;
 
                 plagiarism_drillbit_update_submissions($request, $queueditem->id);
