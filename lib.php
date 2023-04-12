@@ -551,10 +551,22 @@ function plagiarism_drillbit_send_queued_submissions() {
                 //$postdata["assignment_id"] = $folderid;
                 $postdata["documentType"] = "thesis";
 
-                if (!empty($modconfig)) {
+                if(isset($modconfig["plagiarism_exclude_references"])) {
                     $postdata["ex_ref"] = $modconfig["plagiarism_exclude_references"] == "1" ? "yes" : "no";
+                } else {
+                    $postdata["ex_ref"] = $pluginsettings["plagiarism_exclude_references"] == "1" ? "yes" : "no";
+                }
+
+                if(isset($modconfig["plagiarism_exclude_quotes"])) {
                     $postdata["ex_qts"] = $modconfig["plagiarism_exclude_quotes"] == "1" ? "yes" : "no";
+                } else {
+                    $postdata["ex_qts"] = $pluginsettings["plagiarism_exclude_quotes"] == "1" ? "yes" : "no";
+                }
+
+                if(isset($modconfig["plagiarism_exclude_smallsources"])) {
                     $postdata["ex_ss"] = $modconfig["plagiarism_exclude_smallsources"] == "1" ? "yes" : "no";
+                } else {
+                    $postdata["ex_ss"] = $pluginsettings["plagiarism_exclude_smallsources"] == "1" ? "yes" : "no";
                 }
 
                 $postdata["file"] = curl_file_create($tempfile, $mime, $filename);
