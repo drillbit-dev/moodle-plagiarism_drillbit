@@ -49,24 +49,14 @@ if ($paperid != null) {
             $reportdownlink = get_report_download_uri($paperid, $drillbitfile->dkey);
 
 
-            if(empty($reportdownlink)) {
+            if (empty($reportdownlink)) {
                 echo "<center><h3>Unable to get relevant submission report. Please contact Administrator.</h3></center>";
                 exit(0);
             }
-            
+
             $response = plagiarism_drillbit_call_external_api("GET", $reportdownlink, false, $headers);
-            header('Content-Description: File Transfer');
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: inline; filename=' . $paperid . '_' . microtime() . '.pdf');
-            header('Content-Transfer-Encoding: binary');
-            header('Expires: 0');
-            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            header('Pragma: public');
-            header('Content-Length: ' . filesize($response));
-            ob_clean();
-            flush();
-            echo $response;
-            flush();
+
+            send_content_uncached($response, $paperid . '_' . microtime() . '.pdf');
         }
     } else {
         echo get_string('reportfailgeneric', 'plagiarism_drillbit');
