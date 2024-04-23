@@ -1,0 +1,169 @@
+Array
+(
+    [cm] => stdClass Object
+        (
+            [id] => 33
+            [course] => 4
+            [module] => 1
+            [instance] => 15
+            [section] => 14
+            [idnumber] => 
+            [added] => 1713517234
+            [score] => 0
+            [indent] => 0
+            [visible] => 1
+            [visibleoncoursepage] => 1
+            [visibleold] => 1
+            [groupmode] => 0
+            [groupingid] => 0
+            [completion] => 0
+            [completiongradeitemnumber] => 
+            [completionview] => 0
+            [completionexpected] => 0
+            [completionpassgrade] => 0
+            [showdescription] => 0
+            [availability] => 
+            [deletioninprogress] => 0
+            [downloadcontent] => 1
+            [lang] => 
+            [name] => Devaa
+            [modname] => assign
+        )
+
+    [author] => 4
+    [identifier] => b12bc061361528cf9a5c2fb3318ddac9db0c4166
+    [submissiontype] => file
+    [submissionid] => 30
+    [attempt] => 1
+    [drillbitsubmissionid] => 
+    [timemodified] => 1713518915
+    [filename] => LTI1.3 work flow.pdf
+    [file] => stored_file Object
+        (
+            [fs:stored_file:private] => file_storage Object
+                (
+                    [tempdir:file_storage:private] => /var/www/html/moodledata43/temp/filestorage
+                    [filesystem:file_storage:private] => file_system_filedir Object
+                        (
+                            [filedir:protected] => /var/www/html/moodledata43/filedir
+                            [trashdir:protected] => /var/www/html/moodledata43/trashdir
+                            [dirpermissions:protected] => 511
+                            [filepermissions:protected] => 438
+                        )
+
+                )
+
+            [file_record:stored_file:private] => stdClass Object
+                (
+                    [id] => 5358
+                    [contenthash] => 3705070a0a84a1937b78443ff916db36de50cac9
+                    [pathnamehash] => b12bc061361528cf9a5c2fb3318ddac9db0c4166
+                    [contextid] => 62
+                    [component] => assignsubmission_file
+                    [filearea] => submission_files
+                    [itemid] => 34
+                    [filepath] => /
+                    [filename] => LTI1.3 work flow.pdf
+                    [userid] => 4
+                    [filesize] => 191942
+                    [mimetype] => application/pdf
+                    [status] => 0
+                    [source] => LTI1.3 work flow.pdf
+                    [author] => student 2
+                    [license] => unknown
+                    [timecreated] => 1713518914
+                    [timemodified] => 1713518915
+                    [sortorder] => 0
+                    [referencefileid] => 
+                    [repositoryid] => 
+                    [reference] => 
+                    [referencelastsync] => 
+                )
+
+            [repository:stored_file:private] => 
+            [filesystem:stored_file:private] => file_system_filedir Object
+                (
+                    [filedir:protected] => /var/www/html/moodledata43/filedir
+                    [trashdir:protected] => /var/www/html/moodledata43/trashdir
+                    [dirpermissions:protected] => 511
+                    [filepermissions:protected] => 438
+                )
+
+        )
+
+    [previoussubmissions] => Array
+        (
+            [30] => stdClass Object
+                (
+                    [id] => 30
+                    [cm] => 33
+                    [submissionid] => 1665332
+                    [identifier] => b12bc061361528cf9a5c2fb3318ddac9db0c4166
+                    [statuscode] => completed
+                    [lastmodified] => 1713518522
+                    [attempt] => 1
+                )
+
+        )
+
+    [previoussubmission] => stdClass Object
+        (
+            [id] => 30
+            [cm] => 33
+            [submissionid] => 1665332
+            [identifier] => b12bc061361528cf9a5c2fb3318ddac9db0c4166
+            [statuscode] => completed
+            [lastmodified] => 1713518522
+            [attempt] => 1
+        )
+
+    [moduledata] => stdClass Object
+        (
+            [id] => 15
+            [course] => 4
+            [name] => Devaa
+            [intro] => 
+            [introformat] => 1
+            [alwaysshowdescription] => 1
+            [nosubmissions] => 0
+            [submissiondrafts] => 0
+            [sendnotifications] => 0
+            [sendlatenotifications] => 0
+            [duedate] => 1714069800
+            [allowsubmissionsfromdate] => 1713465000
+            [grade] => 100
+            [timemodified] => 1713518219
+            [requiresubmissionstatement] => 0
+            [completionsubmit] => 1
+            [cutoffdate] => 0
+            [gradingduedate] => 1714674600
+            [teamsubmission] => 0
+            [requireallteammemberssubmit] => 0
+            [teamsubmissiongroupingid] => 0
+            [blindmarking] => 0
+            [hidegrader] => 0
+            [revealidentities] => 0
+            [attemptreopenmethod] => none
+            [maxattempts] => -1
+            [markingworkflow] => 0
+            [markingallocation] => 0
+            [sendstudentnotifications] => 1
+            [preventsubmissionnotingroup] => 0
+            [activity] => 
+            [activityformat] => 1
+            [timelimit] => 0
+            [submissionattachments] => 0
+            [resubmission_allowed] => 
+        )
+
+    [settings] => Array
+        (
+            [use_drillbit] => 1
+            [plagiarism_show_student_reports] => 1
+            [plagiarism_exclude_quotes] => 1
+        )
+
+    [moodlesubmission] => 
+    [submissionfields] => id, cm, submissionid, identifier, statuscode, lastmodified, attempt
+    [typefield] =>  submissiontype 
+)

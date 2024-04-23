@@ -18,15 +18,17 @@ if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.'); // It must be included from a Moodle page.
 }
 
-require_once($CFG->dirroot.'/plagiarism/drillbit/lib.php');
+require_once($CFG->dirroot . '/plagiarism/drillbit/lib.php');
 
-class plagiarism_drillbit_observer {
+class plagiarism_drillbit_observer
+{
     /**
      * Handle the course_module_deleted event.
      * @param \core\event\course_module_deleted $event
      */
     public static function course_module_deleted(
-        \core\event\course_module_deleted $event) {
+        \core\event\course_module_deleted $event
+    ) {
         global $DB;
         $eventdata = $event->get_data();
 
@@ -39,7 +41,8 @@ class plagiarism_drillbit_observer {
      * @param \core\event\course_module_deleted $event
      */
     public static function course_reset(
-        \core\event\course_reset_ended $event) {
+        \core\event\course_reset_ended $event
+    ) {
         $eventdata = $event->get_data();
 
         $plugin = new plagiarism_plugin_drillbit();
@@ -52,7 +55,8 @@ class plagiarism_drillbit_observer {
      * @param \assignsubmission_file\event\assessable_uploaded $event
      */
     public static function assignsubmission_file_uploaded(
-        \assignsubmission_file\event\assessable_uploaded $event) {
+        \assignsubmission_file\event\assessable_uploaded $event
+    ) {
         $eventdata = $event->get_data();
         $eventdata['eventtype'] = 'file_uploaded';
         $eventdata['other']['modulename'] = 'assign';
@@ -66,7 +70,8 @@ class plagiarism_drillbit_observer {
      * @param \mod_forum\event\assessable_uploaded $event
      */
     public static function forum_file_uploaded(
-        \mod_forum\event\assessable_uploaded $event) {
+        \mod_forum\event\assessable_uploaded $event
+    ) {
         $eventdata = $event->get_data();
         $eventdata['eventtype'] = 'assessable_submitted';
         $eventdata['other']['modulename'] = 'forum';
@@ -80,7 +85,8 @@ class plagiarism_drillbit_observer {
      * @param \mod_workshop\event\assessable_uploaded $event
      */
     public static function workshop_file_uploaded(
-        \mod_workshop\event\assessable_uploaded $event) {
+        \mod_workshop\event\assessable_uploaded $event
+    ) {
         $eventdata = $event->get_data();
         $eventdata['eventtype'] = 'assessable_submitted';
         $eventdata['other']['modulename'] = 'workshop';
@@ -94,7 +100,8 @@ class plagiarism_drillbit_observer {
      * @param \assignsubmission_onlinetext\event\assessable_uploaded $event
      */
     public static function assignsubmission_onlinetext_uploaded(
-        \assignsubmission_onlinetext\event\assessable_uploaded $event) {
+        \assignsubmission_onlinetext\event\assessable_uploaded $event
+    ) {
         $eventdata = $event->get_data();
         $eventdata['eventtype'] = 'content_uploaded';
         $eventdata['other']['modulename'] = 'assign';
@@ -108,7 +115,8 @@ class plagiarism_drillbit_observer {
      * @param \mod_assign\event\assessable_submitted $event
      */
     public static function coursework_submitted(
-        \mod_coursework\event\assessable_uploaded $event) {
+        \mod_coursework\event\assessable_uploaded $event
+    ) {
         $eventdata = $event->get_data();
         $eventdata['eventtype'] = 'assessable_submitted';
         $eventdata['other']['modulename'] = 'coursework';
@@ -122,7 +130,8 @@ class plagiarism_drillbit_observer {
      * @param \mod_assign\event\assessable_submitted $event
      */
     public static function assignsubmission_submitted(
-        \mod_assign\event\assessable_submitted $event) {
+        \mod_assign\event\assessable_submitted $event
+    ) {
         $eventdata = $event->get_data();
         $eventdata['eventtype'] = 'assessable_submitted';
         $eventdata['other']['modulename'] = 'assign';
@@ -136,12 +145,17 @@ class plagiarism_drillbit_observer {
      * @param \mod_quiz\event\attempt_submitted $event
      */
     public static function quiz_submitted(
-        \mod_quiz\event\attempt_submitted $event) {
+        \mod_quiz\event\attempt_submitted $event
+    ) {
         $eventdata = $event->get_data();
         $eventdata['eventtype'] = 'quiz_submitted';
         $eventdata['other']['modulename'] = 'quiz';
-
+        file_put_contents(__DIR__ . '/debug.log', print_r($eventdata, true));
         $plugin = new plagiarism_plugin_drillbit();
-        $plugin->event_handler($eventdata);
+        try {
+            $plugin->event_handler($eventdata);
+        } catch (\Exception $e) {
+            file_put_contents(__DIR__ . '/debug.log', print_r($e, true));
+        }
     }
 }

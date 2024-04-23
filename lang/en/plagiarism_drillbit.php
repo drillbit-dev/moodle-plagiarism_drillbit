@@ -61,3 +61,12 @@ $string['reportfailgeneric'] = '<h3>Unable to view report for this document.</h3
 $string['reportfailnocm'] = '<h3>Unable to view report for this document. Course module is empty</h3>';
 $string['reportfailnoaccess'] = '<h3>Unable to view report for this document. Invalid role or user not authorized to view this submission report</h3>';
 $string['showstudentreports'] = 'Show reports to students';
+$string['use_drillbit'] = 'Use Drillbit';
+
+// Debugging settings
+$string['drillbitdebugging'] = 'Debugging';
+$string['diagnosticoptions_0'] = 'Off';
+$string['diagnosticoptions_1'] = 'Standard';
+$string['diagnosticoptions_2'] = 'Debugging';
+$string['drillbitdiagnostic'] = 'Enable Diagnostic Mode';
+$string['drillbitdiagnostic_desc'] = '<b>[Caution]</b><br />Enable Diagnostic mode only to track down problems with the Drillbit API.';

@@ -33,11 +33,13 @@ defined('MOODLE_INTERNAL') || die();
 class update_reports extends \core\task\scheduled_task
 {
 
-    public function get_name() {
+    public function get_name()
+    {
         return get_string('updatereportscores', 'plagiarism_drillbit');
     }
 
-    public function execute() {
+    public function execute()
+    {
         global $CFG;
 
         // Call plagiarism drillbit cron function to update report scores.

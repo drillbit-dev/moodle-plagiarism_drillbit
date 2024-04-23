@@ -33,11 +33,13 @@ defined('MOODLE_INTERNAL') || die();
 class send_submissions extends \core\task\scheduled_task
 {
 
-    public function get_name() {
+    public function get_name()
+    {
         return get_string('sendqueuedsubmissions', 'plagiarism_drillbit');
     }
 
-    public function execute() {
+    public function execute()
+    {
         global $CFG;
         mtrace("Drillbit Submission Started .....");
         require_once($CFG->dirroot . '/plagiarism/drillbit/lib.php');

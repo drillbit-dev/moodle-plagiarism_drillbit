@@ -27,11 +27,13 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-require_once($CFG->dirroot.'/plagiarism/drillbit/lib.php');
-require_once($CFG->libdir."/formslib.php");
+require_once($CFG->dirroot . '/plagiarism/drillbit/lib.php');
+require_once($CFG->libdir . "/formslib.php");
 
-class plagiarism_drillbit_setup_form extends moodleform {
-    public function definition() {
+class plagiarism_drillbit_setup_form extends moodleform
+{
+    public function definition()
+    {
         global $DB, $CFG;
 
         $mform = $this->_form;
@@ -39,41 +41,73 @@ class plagiarism_drillbit_setup_form extends moodleform {
         $mform->disable_form_change_checker();
 
         $mform->addElement('header', 'config', get_string('drillbitconfig', 'plagiarism_drillbit'));
-        $mform->addElement('html', get_string('drillbitexplain', 'plagiarism_drillbit').'</br></br>');
+        $mform->addElement('html', get_string('drillbitexplain', 'plagiarism_drillbit') . '</br></br>');
 
         // Loop through all modules that support Plagiarism.
         $mods = array_keys(core_component::get_plugin_list('mod'));
         foreach ($mods as $mod) {
             if (plugin_supports('mod', $mod, FEATURE_PLAGIARISM)) {
-                if ($mod == "assign") {
-                    $mform->addElement('advcheckbox',
-                    'plagiarism_drillbit_mod_'.$mod,
+                $mform->addElement(
+                    'advcheckbox',
+                    'plagiarism_drillbit_mod_' . $mod,
                     get_string('usedrillbit_mod', 'plagiarism_drillbit', ucfirst($mod)),
                     '',
                     null,
                     array(0, 1)
-                    );
-                }
+                );
             }
         }
 
-        $mform->addElement('header', 'plagiarism_drillbit',
-        get_string('drillbitaccountconfig', 'plagiarism_drillbit'));
+        // Drillbit debuggin and loggin settings.
+        $mform->addElement(
+            'header',
+            'plagiarism_drillbit_debugging',
+            get_string('drillbitdebugging', 'plagiarism_drillbit')
+        );
+
+        $diagnosticoptions = array(
+            0 => get_string('diagnosticoptions_0', 'plagiarism_drillbit'),
+            1 => get_string('diagnosticoptions_1', 'plagiarism_drillbit'),
+            2 => get_string('diagnosticoptions_2', 'plagiarism_drillbit')
+        );
+
+        $mform->addElement(
+            'select',
+            'plagiarism_drillbit_enablediagnostics',
+            get_string('drillbitdiagnostic', 'plagiarism_drillbit'),
+            $diagnosticoptions
+        );
+        $mform->addElement('static', 'plagiarism_drillbit_enablediagnostic_desc', null, get_string('drillbitdiagnostic_desc', 'plagiarism_drillbit'));
+
+        $mform->addElement(
+            'header',
+            'plagiarism_drillbit',
+            get_string('drillbitaccountconfig', 'plagiarism_drillbit')
+        );
         $mform->setExpanded('plagiarism_drillbit');
 
-        $mform->addElement('text', 'plagiarism_drillbit_emailid',
-        get_string('drillbitemailid', 'plagiarism_drillbit'));
+        $mform->addElement(
+            'text',
+            'plagiarism_drillbit_emailid',
+            get_string('drillbitemailid', 'plagiarism_drillbit')
+        );
         $mform->setType('plagiarism_drillbit_emailid', PARAM_TEXT);
 
-        $mform->addElement('passwordunmask', 'plagiarism_drillbit_password',
-        get_string('drillbitpassword', 'plagiarism_drillbit'));
+        $mform->addElement(
+            'passwordunmask',
+            'plagiarism_drillbit_password',
+            get_string('drillbitpassword', 'plagiarism_drillbit')
+        );
 
         // $mform->addElement('text', 'plagiarism_drillbit_folderid',
         // get_string('drillbitfolderid', 'plagiarism_drillbit'));
         // $mform->setType('plagiarism_drillbit_folderid', PARAM_TEXT);
 
-        $mform->addElement('text', 'plagiarism_drillbit_apikey',
-        get_string('drillbitapikey', 'plagiarism_drillbit'));
+        $mform->addElement(
+            'text',
+            'plagiarism_drillbit_apikey',
+            get_string('drillbitapikey', 'plagiarism_drillbit')
+        );
         $mform->setType('plagiarism_drillbit_apikey', PARAM_TEXT);
 
         $options = array(
@@ -85,28 +119,50 @@ class plagiarism_drillbit_setup_form extends moodleform {
         $mform->addElement('button', 'connection_test', get_string("connecttest", 'plagiarism_drillbit'));
 
         $mform->addElement('html', '<div id="api_conn_result" class="api_conn_result"></div>');
-        $mform->addElement('header', 'plagiarism_drillbit_plugin_default_settings',
-        get_string('drillbitplugindefaultsettings', 'plagiarism_drillbit'));
+        $mform->addElement(
+            'header',
+            'plagiarism_drillbit_plugin_default_settings',
+            get_string('drillbitplugindefaultsettings', 'plagiarism_drillbit')
+        );
         $mform->setExpanded('plagiarism_drillbit_plugin_default_settings');
-        $options = array(0 => get_string('no', 'plagiarism_drillbit'),
-        1 => get_string('yes', 'plagiarism_drillbit'));
-        $showreportstostudents = $mform->addElement('select', 'plagiarism_show_student_reports',
-        get_string("showstudentreports", "plagiarism_drillbit"), $options);
+        $options = array(
+            0 => get_string('no', 'plagiarism_drillbit'),
+            1 => get_string('yes', 'plagiarism_drillbit')
+        );
+        $showreportstostudents = $mform->addElement(
+            'select',
+            'plagiarism_show_student_reports',
+            get_string("showstudentreports", "plagiarism_drillbit"),
+            $options
+        );
         $showreportstostudents->setSelected('1');
-        $excludereferencesselect = $mform->addElement('select', 'plagiarism_exclude_references',
-        get_string("excludereferences", "plagiarism_drillbit"), $options);
+        $excludereferencesselect = $mform->addElement(
+            'select',
+            'plagiarism_exclude_references',
+            get_string("excludereferences", "plagiarism_drillbit"),
+            $options
+        );
         $excludereferencesselect->setSelected('0');
-        $excludequotesselect = $mform->addElement('select', 'plagiarism_exclude_quotes',
-        get_string("excludequotes", "plagiarism_drillbit"), $options);
+        $excludequotesselect = $mform->addElement(
+            'select',
+            'plagiarism_exclude_quotes',
+            get_string("excludequotes", "plagiarism_drillbit"),
+            $options
+        );
         $excludequotesselect->setSelected('1');
 
-        $excludesmallsources = $mform->addElement('select', 'plagiarism_exclude_smallsources',
-         get_string("excludesmallsources", "plagiarism_drillbit"), $options);
+        $excludesmallsources = $mform->addElement(
+            'select',
+            'plagiarism_exclude_smallsources',
+            get_string("excludesmallsources", "plagiarism_drillbit"),
+            $options
+        );
         $excludesmallsources->setSelected('0');
         $this->add_action_buttons();
     }
 
-    public function validation($data, $files) {
+    public function validation($data, $files)
+    {
         return array();
     }
 }

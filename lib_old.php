@@ -613,12 +613,12 @@ function plagiarism_drillbit_update_reports()
 function plagiarism_drillbit_has_access_to_view_report($cm, $reportfileuser)
 {
     global $USER;
-    $coursemodule = get_coursemodule_from_id('assign', $cm);
+    // $coursemodule = get_coursemodule_from_id('assign', $cm);
 
-    if (empty($coursemodule)) {
-        echo get_string('reportfailnocm', 'plagiarism_drillbit');
-        exit(0);
-    }
+    // if (empty($coursemodule)) {
+    //     echo get_string('reportfailnocm', 'plagiarism_drillbit');
+    //     exit(0);
+    // }
 
     $modulecontext = context_module::instance($cm);
     $hascapability = has_capability('plagiarism/drillbit:viewfullreport', $modulecontext);
