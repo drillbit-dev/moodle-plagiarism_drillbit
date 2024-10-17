@@ -22,9 +22,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 $observers = array (
-    array(
+     array(
         'eventname' => '\assignsubmission_file\event\assessable_uploaded',
         'callback'  => 'plagiarism_drillbit_observer::assignsubmission_file_uploaded'
+    ),
+    array(
+        'eventname' => '\mod_assign\event\submission_status_updated',
+        'callback'  => 'plagiarism_drillbit_observer::assignsubmission_db_update'
     ),
     array(
         'eventname' => '\assignsubmission_onlinetext\event\assessable_uploaded',

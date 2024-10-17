@@ -64,6 +64,21 @@ class plagiarism_drillbit_observer
         $plugin = new plagiarism_plugin_drillbit();
         $plugin->event_handler($eventdata);
     }
+    
+       /**
+     * Handle the assignment assessable_uploaded event.
+     * @param \assignsubmission_file\event\assessable_uploaded $event
+     */
+    public static function assignsubmission_db_update(
+        \mod_assign\event\submission_status_updated $event
+    ) {
+        $eventdata = $event->get_data();
+        $eventdata['eventtype'] = 'assign_submission_updated';
+        $eventdata['other']['modulename'] = 'assign';
+
+        $plugin = new plagiarism_plugin_drillbit();
+        $plugin->event_handler_db_update($eventdata);
+    }
 
     /**
      * Handle the forum assessable_uploaded event.

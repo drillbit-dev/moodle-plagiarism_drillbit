@@ -1,169 +1,318 @@
+dml_read_exception Object
+(
+    [message:protected] => Error reading from database
+    [string:Exception:private] => 
+    [code:protected] => 0
+    [file:protected] => /var/www/html/moodle/lib/dml/moodle_database.php
+    [line:protected] => 494
+    [trace:Exception:private] => Array
+        (
+            [0] => Array
+                (
+                    [file] => /var/www/html/moodle/lib/dml/moodle_read_slave_trait.php
+                    [line] => 293
+                    [function] => query_end
+                    [class] => moodle_database
+                    [type] => ->
+                )
+
+            [1] => Array
+                (
+                    [file] => /var/www/html/moodle/lib/dml/mysqli_native_moodle_database.php
+                    [line] => 1375
+                    [function] => query_end
+                    [class] => mysqli_native_moodle_database
+                    [type] => ->
+                )
+
+            [2] => Array
+                (
+                    [file] => /var/www/html/moodle/lib/dml/moodle_database.php
+                    [line] => 1508
+                    [function] => get_records_sql
+                    [class] => mysqli_native_moodle_database
+                    [type] => ->
+                )
+
+            [3] => Array
+                (
+                    [file] => /var/www/html/moodle/lib/dml/moodle_database.php
+                    [line] => 1459
+                    [function] => get_records_select
+                    [class] => moodle_database
+                    [type] => ->
+                )
+
+            [4] => Array
+                (
+                    [file] => /var/www/html/moodle/plagiarism/drillbit/lib.php
+                    [line] => 547
+                    [function] => get_records
+                    [class] => moodle_database
+                    [type] => ->
+                )
+
+            [5] => Array
+                (
+                    [file] => /var/www/html/moodle/lib/plagiarismlib.php
+                    [line] => 48
+                    [function] => get_links
+                    [class] => plagiarism_plugin_drillbit
+                    [type] => ->
+                )
+
+            [6] => Array
+                (
+                    [file] => /var/www/html/moodle/mod/assign/classes/output/renderer.php
+                    [line] => 1396
+                    [function] => plagiarism_get_links
+                )
+
+            [7] => Array
+                (
+                    [file] => /var/www/html/moodle/mod/assign/classes/output/renderer.php
+                    [line] => 74
+                    [function] => htmllize_tree
+                    [class] => mod_assign\output\renderer
+                    [type] => ->
+                )
+
+            [8] => Array
+                (
+                    [file] => /var/www/html/moodle/lib/outputrenderers.php
+                    [line] => 495
+                    [function] => render_assign_files
+                    [class] => mod_assign\output\renderer
+                    [type] => ->
+                )
+
+            [9] => Array
+                (
+                    [file] => /var/www/html/moodle/mod/assign/classes/output/renderer.php
+                    [line] => 61
+                    [function] => render
+                    [class] => plugin_renderer_base
+                    [type] => ->
+                )
+
+            [10] => Array
+                (
+                    [file] => /var/www/html/moodle/mod/assign/locallib.php
+                    [line] => 6294
+                    [function] => assign_files
+                    [class] => mod_assign\output\renderer
+                    [type] => ->
+                )
+
+            [11] => Array
+                (
+                    [file] => /var/www/html/moodle/mod/assign/submission/file/locallib.php
+                    [line] => 378
+                    [function] => render_area_files
+                    [class] => assign
+                    [type] => ->
+                )
+
+            [12] => Array
+                (
+                    [file] => /var/www/html/moodle/mod/assign/classes/output/renderer.php
+                    [line] => 1048
+                    [function] => view_summary
+                    [class] => assign_submission_file
+                    [type] => ->
+                )
+
+            [13] => Array
+                (
+                    [file] => /var/www/html/moodle/lib/outputrenderers.php
+                    [line] => 495
+                    [function] => render_assign_submission_plugin_submission
+                    [class] => mod_assign\output\renderer
+                    [type] => ->
+                )
+
+            [14] => Array
+                (
+                    [file] => /var/www/html/moodle/mod/assign/classes/output/renderer.php
+                    [line] => 857
+                    [function] => render
+                    [class] => plugin_renderer_base
+                    [type] => ->
+                )
+
+            [15] => Array
+                (
+                    [file] => /var/www/html/moodle/lib/outputrenderers.php
+                    [line] => 495
+                    [function] => render_assign_submission_status
+                    [class] => mod_assign\output\renderer
+                    [type] => ->
+                )
+
+            [16] => Array
+                (
+                    [file] => /var/www/html/moodle/mod/assign/locallib.php
+                    [line] => 5564
+                    [function] => render
+                    [class] => plugin_renderer_base
+                    [type] => ->
+                )
+
+            [17] => Array
+                (
+                    [file] => /var/www/html/moodle/mod/assign/locallib.php
+                    [line] => 5935
+                    [function] => view_student_summary
+                    [class] => assign
+                    [type] => ->
+                )
+
+            [18] => Array
+                (
+                    [file] => /var/www/html/moodle/mod/assign/locallib.php
+                    [line] => 691
+                    [function] => view_submission_page
+                    [class] => assign
+                    [type] => ->
+                )
+
+            [19] => Array
+                (
+                    [file] => /var/www/html/moodle/mod/assign/view.php
+                    [line] => 55
+                    [function] => view
+                    [class] => assign
+                    [type] => ->
+                )
+
+        )
+
+    [previous:Exception:private] => 
+    [errorcode] => dmlreadexception
+    [module] => error
+    [a] => 
+    [link] => 
+    [debuginfo] => Unknown column 'contenhash' in 'where clause'
+SELECT * FROM mdl_plagiarism_drillbit_files WHERE userid = ? AND cm = ? AND identifier = ? AND contenhash = ?  ORDER BY lastmodified DESC LIMIT 0, 1
+[array (
+  0 => '3',
+  1 => '2',
+  2 => 'af58715fbb82dc398be151840983cba0a5995598',
+  3 => 1,
+)]
+    [error] => Unknown column 'contenhash' in 'where clause'
+    [sql] => SELECT * FROM mdl_plagiarism_drillbit_files WHERE userid = ? AND cm = ? AND identifier = ? AND contenhash = ?  ORDER BY lastmodified DESC LIMIT 0, 1
+    [params] => Array
+        (
+            [0] => 3
+            [1] => 2
+            [2] => af58715fbb82dc398be151840983cba0a5995598
+            [3] => 1
+        )
+
+)
 Array
 (
-    [cm] => stdClass Object
+    [eventdata = ] => Array
         (
-            [id] => 33
-            [course] => 4
-            [module] => 1
-            [instance] => 15
-            [section] => 14
-            [idnumber] => 
-            [added] => 1713517234
-            [score] => 0
-            [indent] => 0
-            [visible] => 1
-            [visibleoncoursepage] => 1
-            [visibleold] => 1
-            [groupmode] => 0
-            [groupingid] => 0
-            [completion] => 0
-            [completiongradeitemnumber] => 
-            [completionview] => 0
-            [completionexpected] => 0
-            [completionpassgrade] => 0
-            [showdescription] => 0
-            [availability] => 
-            [deletioninprogress] => 0
-            [downloadcontent] => 1
-            [lang] => 
-            [name] => Devaa
-            [modname] => assign
-        )
-
-    [author] => 4
-    [identifier] => b12bc061361528cf9a5c2fb3318ddac9db0c4166
-    [submissiontype] => file
-    [submissionid] => 30
-    [attempt] => 1
-    [drillbitsubmissionid] => 
-    [timemodified] => 1713518915
-    [filename] => LTI1.3 work flow.pdf
-    [file] => stored_file Object
-        (
-            [fs:stored_file:private] => file_storage Object
+            [eventname] => \assignsubmission_onlinetext\event\assessable_uploaded
+            [component] => assignsubmission_onlinetext
+            [action] => uploaded
+            [target] => assessable
+            [objecttable] => assign_submission
+            [objectid] => 3
+            [crud] => c
+            [edulevel] => 2
+            [contextid] => 18
+            [contextlevel] => 70
+            [contextinstanceid] => 2
+            [userid] => 3
+            [courseid] => 2
+            [relateduserid] => 
+            [anonymous] => 0
+            [other] => Array
                 (
-                    [tempdir:file_storage:private] => /var/www/html/moodledata43/temp/filestorage
-                    [filesystem:file_storage:private] => file_system_filedir Object
+                    [pathnamehashes] => Array
                         (
-                            [filedir:protected] => /var/www/html/moodledata43/filedir
-                            [trashdir:protected] => /var/www/html/moodledata43/trashdir
-                            [dirpermissions:protected] => 511
-                            [filepermissions:protected] => 438
                         )
 
+                    [content] => <p>The error message you're encountering indicates that there is a problem with the timezone database in your PHP installation. This can occur for several reasons, such as an outdated or corrupted timezone database.</p>
+<p>Here are steps you can take to resolve the issue:</p>
+<h3>1. Update PHP</h3>
+<p>Make sure you are running a supported version of PHP, especially since you mentioned needing PHP 8.0.0 for Moodle. If you're using a newer version (like PHP 8.1), consider downgrading to PHP 8.0.x.</p>
+<h3>2. Update the Timezone Database</h3>
+<p>You can update the timezone database using the following methods:</p>
+                    [format] => 1
+                    [modulename] => assign
                 )
 
-            [file_record:stored_file:private] => stdClass Object
+            [timecreated] => 1728566011
+            [eventtype] => content_uploaded
+        )
+
+)
+Array
+(
+    [eventdata = ] => Array
+        (
+            [eventname] => \assignsubmission_file\event\assessable_uploaded
+            [component] => assignsubmission_file
+            [action] => uploaded
+            [target] => assessable
+            [objecttable] => assign_submission
+            [objectid] => 3
+            [crud] => c
+            [edulevel] => 2
+            [contextid] => 18
+            [contextlevel] => 70
+            [contextinstanceid] => 2
+            [userid] => 3
+            [courseid] => 2
+            [relateduserid] => 
+            [anonymous] => 0
+            [other] => Array
                 (
-                    [id] => 5358
-                    [contenthash] => 3705070a0a84a1937b78443ff916db36de50cac9
-                    [pathnamehash] => b12bc061361528cf9a5c2fb3318ddac9db0c4166
-                    [contextid] => 62
-                    [component] => assignsubmission_file
-                    [filearea] => submission_files
-                    [itemid] => 34
-                    [filepath] => /
-                    [filename] => LTI1.3 work flow.pdf
-                    [userid] => 4
-                    [filesize] => 191942
-                    [mimetype] => application/pdf
-                    [status] => 0
-                    [source] => LTI1.3 work flow.pdf
-                    [author] => student 2
-                    [license] => unknown
-                    [timecreated] => 1713518914
-                    [timemodified] => 1713518915
-                    [sortorder] => 0
-                    [referencefileid] => 
-                    [repositoryid] => 
-                    [reference] => 
-                    [referencelastsync] => 
+                    [content] => 
+                    [pathnamehashes] => Array
+                        (
+                            [0] => 20f0ee71d27cd2ae71cdec1f5ad521e1e7e4503f
+                        )
+
+                    [modulename] => assign
                 )
 
-            [repository:stored_file:private] => 
-            [filesystem:stored_file:private] => file_system_filedir Object
+            [timecreated] => 1728566011
+            [eventtype] => file_uploaded
+        )
+
+)
+Array
+(
+    [eventdata = ] => Array
+        (
+            [eventname] => \mod_assign\event\assessable_submitted
+            [component] => mod_assign
+            [action] => submitted
+            [target] => assessable
+            [objecttable] => assign_submission
+            [objectid] => 3
+            [crud] => u
+            [edulevel] => 2
+            [contextid] => 18
+            [contextlevel] => 70
+            [contextinstanceid] => 2
+            [userid] => 3
+            [courseid] => 2
+            [relateduserid] => 
+            [anonymous] => 0
+            [other] => Array
                 (
-                    [filedir:protected] => /var/www/html/moodledata43/filedir
-                    [trashdir:protected] => /var/www/html/moodledata43/trashdir
-                    [dirpermissions:protected] => 511
-                    [filepermissions:protected] => 438
+                    [submission_editable] => 1
+                    [modulename] => assign
                 )
 
+            [timecreated] => 1728566011
+            [eventtype] => assessable_submitted
         )
 
-    [previoussubmissions] => Array
-        (
-            [30] => stdClass Object
-                (
-                    [id] => 30
-                    [cm] => 33
-                    [submissionid] => 1665332
-                    [identifier] => b12bc061361528cf9a5c2fb3318ddac9db0c4166
-                    [statuscode] => completed
-                    [lastmodified] => 1713518522
-                    [attempt] => 1
-                )
-
-        )
-
-    [previoussubmission] => stdClass Object
-        (
-            [id] => 30
-            [cm] => 33
-            [submissionid] => 1665332
-            [identifier] => b12bc061361528cf9a5c2fb3318ddac9db0c4166
-            [statuscode] => completed
-            [lastmodified] => 1713518522
-            [attempt] => 1
-        )
-
-    [moduledata] => stdClass Object
-        (
-            [id] => 15
-            [course] => 4
-            [name] => Devaa
-            [intro] => 
-            [introformat] => 1
-            [alwaysshowdescription] => 1
-            [nosubmissions] => 0
-            [submissiondrafts] => 0
-            [sendnotifications] => 0
-            [sendlatenotifications] => 0
-            [duedate] => 1714069800
-            [allowsubmissionsfromdate] => 1713465000
-            [grade] => 100
-            [timemodified] => 1713518219
-            [requiresubmissionstatement] => 0
-            [completionsubmit] => 1
-            [cutoffdate] => 0
-            [gradingduedate] => 1714674600
-            [teamsubmission] => 0
-            [requireallteammemberssubmit] => 0
-            [teamsubmissiongroupingid] => 0
-            [blindmarking] => 0
-            [hidegrader] => 0
-            [revealidentities] => 0
-            [attemptreopenmethod] => none
-            [maxattempts] => -1
-            [markingworkflow] => 0
-            [markingallocation] => 0
-            [sendstudentnotifications] => 1
-            [preventsubmissionnotingroup] => 0
-            [activity] => 
-            [activityformat] => 1
-            [timelimit] => 0
-            [submissionattachments] => 0
-            [resubmission_allowed] => 
-        )
-
-    [settings] => Array
-        (
-            [use_drillbit] => 1
-            [plagiarism_show_student_reports] => 1
-            [plagiarism_exclude_quotes] => 1
-        )
-
-    [moodlesubmission] => 
-    [submissionfields] => id, cm, submissionid, identifier, statuscode, lastmodified, attempt
-    [typefield] =>  submissiontype 
 )

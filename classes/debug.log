@@ -5,24 +5,24 @@ Array
     [action] => submitted
     [target] => attempt
     [objecttable] => quiz_attempts
-    [objectid] => 7
+    [objectid] => 1
     [crud] => u
     [edulevel] => 2
-    [contextid] => 60
+    [contextid] => 25
     [contextlevel] => 70
-    [contextinstanceid] => 31
-    [userid] => 4
-    [courseid] => 4
-    [relateduserid] => 4
+    [contextinstanceid] => 7
+    [userid] => 3
+    [courseid] => 2
+    [relateduserid] => 3
     [anonymous] => 0
     [other] => Array
         (
-            [submitterid] => 4
-            [quizid] => 2
+            [submitterid] => 3
+            [quizid] => 1
             [studentisonline] => 1
             [modulename] => quiz
         )
 
-    [timecreated] => 1713421566
+    [timecreated] => 1727414787
     [eventtype] => quiz_submitted
 )

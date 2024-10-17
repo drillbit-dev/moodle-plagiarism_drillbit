@@ -177,19 +177,58 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                         'id',
                         (array('cm' => $data->coursemodule, 'name' => $field))
                     );
-                    if ($optionfield->value != 0) {
-                        if (!$DB->update_record('drillbit_plugin_config', $optionfield)) {
-                            plagiarism_drillbit_print_error('defaultupdateerror', 'plagiarism_drillbit', null, null, __FILE__, __LINE__);
-                        }
+                    if (!$DB->update_record('drillbit_plugin_config', $optionfield)) {
+                        plagiarism_drillbit_print_error('defaultupdateerror', 'plagiarism_drillbit', null, null, __FILE__, __LINE__);
                     }
                 } else {
-                    if (!empty($optionfield->cm) && !empty($optionfield->name)) {
-                        $optionfield->config_hash = $optionfield->cm . "_" . $optionfield->name;
-                        if ($optionfield->value != 0) {
-                            if (!$DB->insert_record('drillbit_plugin_config', $optionfield)) {
-                                plagiarism_drillbit_print_error('defaultinserterror', 'plagiarism_drillbit', null, null, __FILE__, __LINE__);
-                            }
-                        }
+                    $optionfield->config_hash = $optionfield->cm . "_" . $optionfield->name;
+                    if (!$DB->insert_record('drillbit_plugin_config', $optionfield)) {
+                        plagiarism_drillbit_print_error('defaultinserterror', 'plagiarism_drillbit', null, null, __FILE__, __LINE__);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Save the form data associated with the plugin
+     *
+     * @global type $DB
+     * @param object $data the form data to save
+     */
+    public function save_form_elements_drillbit($data)
+    {
+        global $DB;
+
+        $moduledrillbitenabled = $this->get_config_settings('mod_' . $data->modulename);
+        if (empty($moduledrillbitenabled)) {
+            return;
+        }
+
+        $settingsfields = $this->get_settings_fields();
+        // Get current values.
+        $plagiarismvalues = $this->get_settings($data->coursemodule, false);
+
+        foreach ($settingsfields as $field) {
+            if (isset($data->$field)) {
+                $optionfield = new stdClass();
+                $optionfield->cm = $data->coursemodule;
+                $optionfield->name = $field;
+                $optionfield->value = $data->$field;
+
+                if (isset($plagiarismvalues[$field])) {
+                    $optionfield->id = $DB->get_field(
+                        'drillbit_plugin_config',
+                        'id',
+                        (array('cm' => $data->coursemodule, 'name' => $field))
+                    );
+                    if (!$DB->update_record('drillbit_plugin_config', $optionfield)) {
+                        plagiarism_drillbit_print_error('defaultupdateerror', 'plagiarism_drillbit', null, null, __FILE__, __LINE__);
+                    }
+                } else {
+                    $optionfield->config_hash = $optionfield->cm . "_" . $optionfield->name;
+                    if (!$DB->insert_record('drillbit_plugin_config', $optionfield)) {
+                        plagiarism_drillbit_print_error('defaultinserterror', 'plagiarism_drillbit', null, null, __FILE__, __LINE__);
                     }
                 }
             }
@@ -281,12 +320,88 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         }
     }
 
+
+    public function get_form_elements_module_drillbit($mform, $context, $modulename = "")
+    {
+        global $DB, $PAGE, $COURSE;
+
+        static $settingsdisplayed;
+        if ($settingsdisplayed) {
+            return;
+        }
+
+        if (has_capability('plagiarism/drillbit:enable', $context)) {
+            // Get Course module id and values.
+            $cmid = optional_param('update', null, PARAM_INT);
+
+            // Return no form if the plugin isn't configured.
+            if (!$this->is_plugin_configured()) {
+                return;
+            }
+
+            // Check if plagiarism plugin is enabled for this module if provided.
+            if (!empty($modulename)) {
+                $moduledrillbitenabled = $this->get_config_settings($modulename);
+
+                if (empty($moduledrillbitenabled)) {
+                    return;
+                }
+            }
+
+            // Get assignment settings, use default settings on assignment creation.
+            $plagiarismvalues = $this->get_settings($cmid);
+
+            if (empty($plagiarismvalues["use_drillbit"]) && count($plagiarismvalues) <= 2) {
+                $savedvalues = $plagiarismvalues;
+                $plagiarismvalues = $this->get_settings(null);
+
+                // Ensure we reuse the saved setting for use Drillbit.
+                if (isset($savedvalues["use_drillbit"])) {
+                    $plagiarismvalues["use_drillbit"] = $savedvalues["use_drillbit"];
+                }
+            }
+
+            $plagiarismelements = $this->get_settings_fields();
+
+            $drillbitview = new plagiarism_drillbit_view();
+            $plagiarismvalues["plagiarism_rubric"] = (!empty($plagiarismvalues["plagiarism_rubric"])) ? $plagiarismvalues["plagiarism_rubric"] : 0;
+
+            // We don't require the settings form on Moodle 3.3's bulk completion feature.
+            if ($PAGE->pagetype != 'course-editbulkcompletion' && $PAGE->pagetype != 'course-editdefaultcompletion') {
+                // Create/Edit course in Turnitin and join user to class.
+                $course = $COURSE; //$this->get_course_data($cmid, $COURSE->id);
+                $drillbitview->add_elements_to_settings_form($mform, $course, "activity", $modulename, $cmid, $plagiarismvalues["plagiarism_rubric"]);
+            }
+            $settingsdisplayed = true;
+
+            // Disable all plagiarism elements if drillbit is not enabled.
+            foreach ($plagiarismelements as $element) {
+                if ($element <> 'use_drillbit') { // Ignore this var.
+                    $mform->disabledIf($element, 'use_drillbit', 'eq', 0);
+                }
+            }
+
+            // Check if files have already been submitted and disable exclude biblio and quoted if drillbit is enabled.
+            if ($cmid != 0) {
+                if ($DB->record_exists('plagiarism_drillbit_files', array('cm' => $cmid))) {
+                    $mform->disabledIf('plagiarism_exclude_biblio', 'use_drillbit');
+                    $mform->disabledIf('plagiarism_exclude_quoted', 'use_drillbit');
+                }
+            }
+
+            // Set the default value for each option as the value we have stored.
+            foreach ($plagiarismelements as $element) {
+                if (isset($plagiarismvalues[$element])) {
+                    $mform->setDefault($element, $plagiarismvalues[$element]);
+                }
+            }
+        }
+    }
+
     public function get_links($linkarray)
     {
-        global $CFG, $DB, $OUTPUT, $USER;
+        global $CFG, $DB, $OUTPUT, $USER, $COURSE;
         $output = "";
-
-
         try {
             // Don't show links for certain file types as they won't have been submitted to drillbit.
             if (!empty($linkarray["file"])) {
@@ -317,9 +432,7 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
             }
 
             static $cm;
-
-            
-			static $forum;
+            static $forum;
             if (empty($cm)) {
                 $cm = get_coursemodule_from_id('', $linkarray["cmid"]);
 
@@ -329,8 +442,7 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                     }
                 }
             }
-			
-			
+
             static $config;
             if (empty($config)) {
                 $config = $this->plagiarism_drillbit_admin_config();
@@ -398,9 +510,282 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                         $identifier = sha1($linkarray["content"] . $linkarray["itemid"]);
                     } else if ($cm->modname == 'workshop') {
                         $identifier = sha1($linkarray["content"]);
+                    }else if ($cm->modname == 'assign') {
+                        $identifier = sha1($linkarray["content"]);
                     }
                 }
-                //var_dump($submissiontype);
+                // var_dump($submissiontype);
+                // Group submissions where all students have to submit sets userid to 0.
+                if ($linkarray['userid'] == 0 && !$istutor) {
+                    $linkarray['userid'] = $USER->id;
+                }
+
+                $submissionusers = array($linkarray["userid"]);
+                if ($cm->modname == 'assign') {
+                    $assignment = new assign($context, $cm, null);
+                    $group = $assignment->get_submission_group($linkarray["userid"]);
+
+                    if ($group = $assignment->get_submission_group($linkarray["userid"])) {
+                        $users = groups_get_members($group->id);
+                        $submissionusers = array_keys($users);
+                    }
+                }
+
+                $plagiarismfiles = $DB->get_records(
+                    'plagiarism_drillbit_files',
+                    array(
+                        'userid' => $linkarray["userid"],
+                        'cm' => $linkarray["cmid"], 'identifier' => $identifier,
+                        'plagcheck' => 1
+                    ),
+                    'lastmodified DESC',
+                    '*',
+                    0,
+                    1
+                );
+
+                $plagiarismfile = current($plagiarismfiles);
+
+                if (empty($plagiarismfile)) {
+                    return $output;
+                }
+
+                $canprintreport = plagiarism_drillbit_has_access_to_view_report($linkarray["cmid"], $linkarray["userid"]);
+
+                if (!$canprintreport) {
+                    return $output;
+                }
+
+                if ($plagiarismfile->statuscode == 'queued') {
+                    $statusstr =
+                        get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('queued', 'plagiarism_drillbit');
+                    $content = $OUTPUT->pix_icon(
+                        'drillbitIcon',
+                        $statusstr,
+                        'plagiarism_drillbit',
+                        array('class' => 'icon_size')
+                    ) . $statusstr;
+
+                    $output .= html_writer::tag(
+                        'div',
+                        $content,
+                        array('class' => 'drillbit_status')
+                    );
+                } else if ($plagiarismfile->statuscode == 'submitted') {
+                    $statusstr =
+                        get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('submitted', 'plagiarism_drillbit');
+                    $content = $OUTPUT->pix_icon(
+                        'drillbitIcon',
+                        $statusstr,
+                        'plagiarism_drillbit',
+                        array('class' => 'icon_size')
+                    ) . $statusstr;
+
+                    $output .= html_writer::tag(
+                        'div',
+                        $content,
+                        array('class' => 'drillbit_status')
+                    );
+                } else if ($plagiarismfile->statuscode == 'completed') {
+                    $statusstr =
+                        get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('completed', 'plagiarism_drillbit');
+                    $score =
+                        "&nbsp;&nbsp;<b>" . "</br>" . "Similarity Score: " . $plagiarismfile->similarityscore . " </b>";
+                    $score1 =
+                        "<b>" . "AI Score: " . $plagiarismfile->aiscore . " </b>";
+                    $content = $OUTPUT->pix_icon(
+                        'drillbitIcon',
+                        $statusstr,
+                        'plagiarism_drillbit',
+                        array('class' => 'icon_size')
+                    ) . $statusstr . $score;
+
+                    $content1 =  html_writer::tag('span', $score1, array('class' => 'score-class'));;
+
+                    $output .= html_writer::tag(
+                        'div',
+                        $content,
+                        array('class' => 'drillbit_status')
+                    );
+                    
+
+                    $courseid = $COURSE->id;
+                    $context = context_course::instance($courseid);
+
+                    $analysis_page_url = get_analysis_page_download_uri($plagiarismfile->submissionid);
+                    $analysis_page_url_final = plagiarism_drillbit_call_external_api("GET",$analysis_page_url);
+
+                    
+                    if(has_capability('plagiarism/drillbit:viewanalysispage', $context, $USER->id)) {
+                        $href = html_writer::tag(
+                            'a',
+                            get_string('vwanalysis', 'plagiarism_drillbit'),
+                            array(
+                                'class' => 'drillbit_report_link',
+                                'href' => $analysis_page_url_final,
+                                'target' => '_blank'
+                            )
+                        );
+                        $output .= html_writer::tag(
+                            'div',
+                            $content1,
+                            array('class' => 'drillbit_status')
+                        );
+    
+                        $output .= html_writer::div($href, "drillbit_report_link_class");                        
+                    } else {
+                        $href = html_writer::tag(
+                            'a',
+                            get_string('vwreport', 'plagiarism_drillbit'),
+                            array(
+                                'class' => 'drillbit_report_link',
+                                'href' => '../../plagiarism/drillbit/report_file.php?paper_id=' . $plagiarismfile->submissionid,
+                                'target' => '_blank'
+                            )
+                        );
+    
+                        $output .= html_writer::div($href, "drillbit_report_link_class");
+                    }
+                } else {
+                    $statusstr =
+                        get_string('drillbitstatus', 'plagiarism_drillbit') . ': ' . get_string('pending', 'plagiarism_drillbit');
+                    $output .= html_writer::tag(
+                        'div',
+                        $OUTPUT->pix_icon(
+                            'drillbitIcon',
+                            $statusstr,
+                            'plagiarism_drillbit',
+                            array('class' => 'icon_size')
+                        ) . $statusstr,
+                        array('class' => 'drillbit_status')
+                    );
+                }
+            }
+
+            return $output;
+        } catch (\Exception $e) {
+            file_put_contents(__DIR__ . '/lib.log', print_r($e, true));
+        }
+    }
+
+
+    public function get_links_drillbit($linkarray)
+    {
+        global $CFG, $DB, $OUTPUT, $USER;
+        $output = "";
+        try {
+            // Don't show links for certain file types as they won't have been submitted to drillbit.
+            if (!empty($linkarray["file"])) {
+                $file = $linkarray["file"];
+                $filearea = $file->get_filearea();
+                $nonsubmittingareas = array("feedback_files", "introattachment");
+                if (in_array($filearea, $nonsubmittingareas)) {
+                    return $output;
+                }
+            }
+
+            $component = (!empty($linkarray['component'])) ? $linkarray['component'] : "";
+
+            // Exit if this is a quiz and quizzes are disabled.
+            // if ($component == "qtype_essay" && empty($this->get_config_settings('mod_quiz'))) {
+            //     return $output;
+            // }
+
+            // If this is a quiz, retrieve the cmid
+            if ($component == "qtype_essay" && !empty($linkarray['area']) && empty($linkarray['cmid'])) {
+                $questions = question_engine::load_questions_usage_by_activity($linkarray['area']);
+
+                // Try to get cm using the questions owning context.
+                $context = $questions->get_owning_context();
+                if (empty($linkarray['cmid']) && $context->contextlevel == CONTEXT_MODULE) {
+                    $linkarray['cmid'] = $context->instanceid;
+                }
+            }
+
+            static $cm;
+            static $forum;
+            if (empty($cm)) {
+                $cm = get_coursemodule_from_id('', $linkarray["cmid"]);
+
+                if ($cm->modname == 'forum') {
+                    if (!$forum = $DB->get_record("forum", array("id" => $cm->instance))) {
+                        print_error('invalidforumid', 'forum');
+                    }
+                }
+            }
+
+            static $config;
+            if (empty($config)) {
+                $config = $this->plagiarism_drillbit_admin_config();
+            }
+
+            // Retrieve the plugin settings for this module.
+            static $plagiarismsettings = null;
+            if (is_null($plagiarismsettings)) {
+                $plagiarismsettings = $this->get_settings($linkarray["cmid"]);
+            }
+
+            // Is this plugin enabled for this activity type.
+            static $moduledrillbitenabled;
+            if (empty($moduledrillbitenabled)) {
+                $moduledrillbitenabled = $this->get_config_settings('mod_' . $cm->modname);
+            }
+
+            // Exit if drillbit is not being used for this module or activity type.
+            if (empty($moduledrillbitenabled) || empty($plagiarismsettings['use_drillbit'])) {
+                return $output;
+            }
+
+            // $ismoduleallowed = get_allowed_modules_for_drillbit($cm->modname);
+            // if (!$ismoduleallowed) {
+            //     return;
+            // }
+
+            static $moduledata;
+            if (empty($moduledata)) {
+                $moduledata = $DB->get_record($cm->modname, array('id' => $cm->instance));
+            }
+
+            static $context;
+            if (empty($context)) {
+                $context = context_course::instance($cm->course);
+            }
+
+            static $istutor;
+            if (empty($istutor)) {
+                $istutor = $this->is_tutor($context);
+            }
+
+            if ((!empty($linkarray["file"]) || !empty($linkarray["content"])) && !empty($linkarray["cmid"])) {
+
+                $identifier = '';
+                $itemid = 0;
+
+                // Get File or Content information.
+                $submittinguser = $linkarray['userid'];
+                if (!empty($linkarray["file"])) {
+                    $identifier = $file->get_pathnamehash();
+                    $itemid = $file->get_itemid();
+                    $submissiontype = 'file';
+                } else if (!empty($linkarray["content"])) {
+                    // Get drillbit text content details.
+                    $submissiontype = 'text_content';
+                    if ($cm->modname == 'forum') {
+                        $submissiontype = 'forum_post';
+                        $identifier = sha1($linkarray["content"]);
+                    } else if ($cm->modname == 'quiz') {
+                        $submissiontype = 'quiz_answer';
+
+
+
+                        $identifier = sha1($linkarray["content"] . $linkarray["itemid"]);
+                    } else if ($cm->modname == 'workshop') {
+                        $identifier = sha1($linkarray["content"]);
+                    }else if ($cm->modname == 'assign') {
+                        $identifier = sha1($linkarray["content"]);
+                    }
+                }
+                // var_dump($submissiontype);
                 // Group submissions where all students have to submit sets userid to 0.
                 if ($linkarray['userid'] == 0 && !$istutor) {
                     $linkarray['userid'] = $USER->id;
@@ -516,8 +901,6 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                 }
             }
 
-
-            //}
             return $output;
         } catch (\Exception $e) {
             file_put_contents(__DIR__ . '/lib.log', print_r($e, true));
@@ -536,199 +919,209 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         $errorcode = 0;
         $attempt = 0;
         $drillbitsubmissionid = null;
-        $updatedd = $DB->get_record('drillbit_plugin_config', ['cm' => $cm->id, 'name' => 'use_drillbit']);
-        if ($updatedd->value != 0) {
-            // $coursedata = $this->get_course_data($cm->id, $cm->course);
+        $plagcheck = 1;
 
-            // Check if file has been submitted before.
-            $plagiarismfiles = plagiarism_drillbit_retrieve_successful_submissions($author, $cm->id, $identifier);
-            // if (count($plagiarismfiles) > 0) {
-            //     return true;
-            // }
+        // $coursedata = $this->get_course_data($cm->id, $cm->course);
 
-            $settings = $this->get_settings($cm->id);
+        // Check if file has been submitted before.
+        // $plagiarismfiles = plagiarism_drillbit_retrieve_successful_submissions($author, $cm->id, $identifier);
+        // if (count($plagiarismfiles) > 0) {
+        //     return true;
+        // }
 
-            // Get module data.
-            $moduledata = $DB->get_record($cm->modname, array('id' => $cm->instance));
-            $moduledata->resubmission_allowed = false;
+        $settings = $this->get_settings($cm->id);
 
-            $userid = $author;
+        if(!$settings["use_drillbit"]){
+            $plagcheck = 0;
+        }
 
-            // Work out submission method.
-            // If this file has successfully submitted in the past then break, text content is to be submitted.
-            switch ($submissiontype) {
-                case 'file':
-                case 'text_content':
-                    try {
-                        // Get file data or prepare text submission.
-                        if ($submissiontype == 'file') {
-                            $fs = get_file_storage();
-                            $file = $fs->get_file_by_hash($identifier);
+        // Get module data.
+        $moduledata = $DB->get_record($cm->modname, array('id' => $cm->instance));
+        $moduledata->resubmission_allowed = false;
 
-                            $timemodified = $file->get_timemodified();
-                            $filename = $file->get_filename();
-                        } else {
-                            // Check when text submission was last modified.
-                            switch ($cm->modname) {
-                                case 'assign':
-                                    $moodlesubmission = $DB->get_record(
-                                        'assign_submission',
-                                        array(
-                                            'assignment' => $cm->instance,
-                                            'userid' => $userid,
-                                            'id' => $itemid
-                                        ),
-                                        'timemodified'
-                                    );
-                                    break;
-                                case 'workshop':
-                                    $moodlesubmission = $DB->get_record(
-                                        'workshop_submissions',
-                                        array(
-                                            'workshopid' => $cm->instance,
-                                            'authorid' => $userid
-                                        ),
-                                        'timemodified'
-                                    );
-                                    break;
-                            }
+        $userid = $author;
 
-                            $timemodified = $moodlesubmission->timemodified;
-                        }
+        // Work out submission method.
+        // If this file has successfully submitted in the past then break, text content is to be submitted.
+        switch ($submissiontype) {
+            case 'file':
+            case 'text_content':
+                try {
+                    // Get file data or prepare text submission.
+                    if ($submissiontype == 'file') {
+                        $fs = get_file_storage();
+                        $file = $fs->get_file_by_hash($identifier);
 
-                        // Get submission method depending on whether there has been a previous submission.
-                        $submissionfields = 'id, cm, submissionid, identifier, statuscode, lastmodified, attempt';
-                        $typefield = ($CFG->dbtype == "oci") ? " to_char(submissiontype) " : " submissiontype ";
-
-                        // Check if this content/file has been submitted previously.
-                        $previoussubmissions = $DB->get_records_select(
-                            'plagiarism_drillbit_files',
-                            " cm = ? AND userid = ? AND " . $typefield . " = ? AND identifier = ?",
-                            array($cm->id, $author, $submissiontype, $identifier),
-                            'id',
-                            $submissionfields
-                        );
-                        $previoussubmission = end($previoussubmissions);
-
-                        if ($previoussubmission) {
-                            // Don't submit if submission hasn't changed.
-                            if (
-                                in_array($previoussubmission->statuscode, array("success", "error"))
-                                && $timemodified <= $previoussubmission->lastmodified
-                            ) {
-                                return true;
-                            } else if ($moduledata->resubmission_allowed) {
-                                // Replace submission in the specific circumstance where Drillbit can accommodate resubmissions.
-                                $submissionid = $previoussubmission->id;
-                                $this->reset_drillbit_submission($cm, $author, $identifier, $previoussubmission, $submissiontype);
-                                $drillbitsubmissionid = $previoussubmission->submissionid;
-                            } else {
-                                if ($previoussubmission->statuscode != "success") {
-                                    $submissionid = $previoussubmission->id;
-                                    $this->reset_drillbit_submission($cm, $author, $identifier, $previoussubmission, $submissiontype);
-                                } else {
-                                    $submissionid = $this->create_new_drillbit_submission($cm, $author, $identifier, $submissiontype);
-                                    $drillbitsubmissionid = $previoussubmission->submissionid;
-                                }
-                            }
-                            $attempt = $previoussubmission->attempt;
-                        } else {
-                            // Check if there is previous submission of different content which we may be able to replace.
-                            $typefield = ($CFG->dbtype == "oci") ? " to_char(submissiontype) " : " submissiontype ";
-                            if ($previoussubmission = $DB->get_record_select(
-                                'plagiarism_drillbit_files',
-                                " cm = ? AND userid = ? AND " . $typefield . " = ?",
-                                array($cm->id, $author, $submissiontype),
-                                'id, cm, submissionid, identifier, statuscode, lastmodified, attempt'
-                            )) {
-
-                                $submissionid = $previoussubmission->id;
-                                $attempt = $previoussubmission->attempt;
-                                // // Delete old text content submissions from Drillbit if resubmissions aren't allowed.
-                                // if ($submissiontype == 'text_content' && $settings["plagiarism_report_gen"] == 0 && !is_null($previoussubmission->externalid)) {
-                                //     $this->delete_drillbit_submission($cm, $previoussubmission->externalid, $author);
-                                // }
-
-                                // Replace submission in the specific circumstance where Drillibit can accomodate resubmissions.
-                                if ($moduledata->resubmission_allowed || $submissiontype == 'text_content') {
-                                    $this->reset_drillbit_submission($cm, $author, $identifier, $previoussubmission, $submissiontype);
-                                    $drillbitsubmissionid = $previoussubmission->submissionid;
-                                } else {
-                                    $submissionid = $this->create_new_drillbit_submission($cm, $author, $identifier, $submissiontype);
-                                }
-                            } else {
-                                $submissionid = $this->create_new_drillbit_submission($cm, $author, $identifier, $submissiontype);
-                            }
-                        }
-
-                        // log all variables in case of error
-                        file_put_contents(__DIR__ . '/lib.log', print_r(array(
-                            'cm' => $cm,
-                            'author' => $author,
-                            'identifier' => $identifier,
-                            'submissiontype' => $submissiontype,
-                            'submissionid' => $submissionid,
-                            'attempt' => $attempt,
-                            'drillbitsubmissionid' => $drillbitsubmissionid,
-                            'timemodified' => $timemodified,
-                            'filename' => $filename,
-                            'file' => $file,
-                            'previoussubmissions' => $previoussubmissions,
-                            'previoussubmission' => $previoussubmission,
-                            'moduledata' => $moduledata,
-                            'settings' => $settings,
-                            'moodlesubmission' => @$moodlesubmission,
-                            'submissionfields' => $submissionfields,
-                            'typefield' => $typefield
-                        ), true));
-                    } catch (\Exception $e) {
-                        file_put_contents(__DIR__ . '/lib.log', print_r($e, true));
-                    }
-                    break;
-
-                case 'forum_post':
-
-                case 'quiz_answer':
-                    if ($previoussubmissions = $DB->get_records_select(
-                        'plagiarism_drillbit_files',
-                        " cm = ? AND userid = ? AND identifier = ? ",
-                        array($cm->id, $author, $identifier),
-                        'id DESC',
-                        'id, cm, identifier, statuscode, attempt',
-                        0,
-                        1
-                    )) {
-
-                        $previoussubmission = current($previoussubmissions);
-                        if ($previoussubmission->statuscode == "success") {
-                            return true;
-                        } else {
-                            $submissionid = $previoussubmission->id;
-                            $attempt = $previoussubmission->attempt;
-                            $this->reset_drillbit_submission($cm, $author, $identifier, $previoussubmission, $submissiontype);
-                        }
+                        $timemodified = $file->get_timemodified();
+                        $filename = $file->get_filename();
                     } else {
-                        $submissionid = $this->create_new_drillbit_submission($cm, $author, $identifier, $submissiontype);
+                        // Check when text submission was last modified.
+                        switch ($cm->modname) {
+                            case 'assign':
+                                $moodlesubmission = $DB->get_record(
+                                    'assign_submission',
+                                    array(
+                                        'assignment' => $cm->instance,
+                                        'userid' => $userid,
+                                        'id' => $itemid
+                                    ),
+                                    'timemodified'
+                                );
+                                break;
+                            case 'workshop':
+                                $moodlesubmission = $DB->get_record(
+                                    'workshop_submissions',
+                                    array(
+                                        'workshopid' => $cm->instance,
+                                        'authorid' => $userid
+                                    ),
+                                    'timemodified'
+                                );
+                                break;
+                        }
+
+                        $timemodified = $moodlesubmission->timemodified;
                     }
-                    break;
-            }
 
-            // Check file is less than maximum allowed size.
-            if ($submissiontype == 'file') {
-                if ($file->get_filesize() > PLAGIARISM_DRILLBIT_MAX_FILE_UPLOAD_SIZE) {
-                    $errorcode = 2;
+                    // Get submission method depending on whether there has been a previous submission.
+                    $submissionfields = 'id, cm, submissionid, identifier, statuscode, lastmodified, attempt';
+                    $typefield = ($CFG->dbtype == "oci") ? " to_char(submissiontype) " : " submissiontype ";
+
+                    // Check if this content/file has been submitted previously.
+                    $previoussubmissions = $DB->get_records_select(
+                        'plagiarism_drillbit_files',
+                        " cm = ? AND userid = ? AND " . $typefield . " = ? AND identifier = ?",
+                        array($cm->id, $author, $submissiontype, $identifier),
+                        'id',
+                        $submissionfields
+                    );
+                    $previoussubmission = end($previoussubmissions);
+
+                    if ($previoussubmission) {
+                        $DB->delete_records('plagiarism_drillbit_files', array('id' => $previoussubmission->id));
+                    }
+
+                    // if ($previoussubmission) {
+                    //     // Don't submit if submission hasn't changed.
+                    //     if (
+                    //         in_array($previoussubmission->statuscode, array("success", "error"))
+                    //         && $timemodified <= $previoussubmission->lastmodified
+                    //     ) {
+                    //         return true;
+                    //     } else if ($moduledata->resubmission_allowed) {
+                    //         // Replace submission in the specific circumstance where Drillbit can accommodate resubmissions.
+                    //         $submissionid = $previoussubmission->id;
+                    //         $this->reset_drillbit_submission($cm, $author, $identifier, $previoussubmission, $submissiontype);
+                    //         $drillbitsubmissionid = $previoussubmission->submissionid;
+                    //     } else {
+                    //         if ($previoussubmission->statuscode != "success") {
+                    //             $submissionid = $previoussubmission->id;
+                    //             $this->reset_drillbit_submission($cm, $author, $identifier, $previoussubmission, $submissiontype);
+                    //         } else {
+                    //             $submissionid = $this->create_new_drillbit_submission($cm, $author, $identifier, $submissiontype);
+                    //             $drillbitsubmissionid = $previoussubmission->submissionid;
+                    //         }
+                    //     }
+                    //     $attempt = $previoussubmission->attempt;
+                    // } else {
+                    //     // Check if there is previous submission of different content which we may be able to replace.
+                    //     $typefield = ($CFG->dbtype == "oci") ? " to_char(submissiontype) " : " submissiontype ";
+                    //     if ($previoussubmission = $DB->get_record_select(
+                    //         'plagiarism_drillbit_files',
+                    //         " cm = ? AND userid = ? AND " . $typefield . " = ?",
+                    //         array($cm->id, $author, $submissiontype),
+                    //         'id, cm, submissionid, identifier, statuscode, lastmodified, attempt'
+                    //     )) {
+
+                    //         $submissionid = $previoussubmission->id;
+                    //         $attempt = $previoussubmission->attempt;
+                    //         // // Delete old text content submissions from Drillbit if resubmissions aren't allowed.
+                    //         // if ($submissiontype == 'text_content' && $settings["plagiarism_report_gen"] == 0 && !is_null($previoussubmission->externalid)) {
+                    //         //     $this->delete_drillbit_submission($cm, $previoussubmission->externalid, $author);
+                    //         // }
+
+                    //         // Replace submission in the specific circumstance where Drillibit can accomodate resubmissions.
+                    //         if ($moduledata->resubmission_allowed || $submissiontype == 'text_content') {
+                    //             $this->reset_drillbit_submission($cm, $author, $identifier, $previoussubmission, $submissiontype);
+                    //             $drillbitsubmissionid = $previoussubmission->submissionid;
+                    //         } else {
+                    //             $submissionid = $this->create_new_drillbit_submission($cm, $author, $identifier, $submissiontype);
+                    //         }
+                    //     } else {
+                    //         $submissionid = $this->create_new_drillbit_submission($cm, $author, $identifier, $submissiontype);
+                    //     }
+                    // }
+
+                    $submissionid = $this->create_new_drillbit_submission($cm, $author, $identifier, $submissiontype);
+
+                    // log all variables in case of error
+                    // file_put_contents(__DIR__ . '/lib.log', print_r(array(
+                    //     'cm' => $cm,
+                    //     'author' => $author,
+                    //     'identifier' => $identifier,
+                    //     'submissiontype' => $submissiontype,
+                    //     'submissionid' => $submissionid,
+                    //     'attempt' => $attempt,
+                    //     'drillbitsubmissionid' => $drillbitsubmissionid,
+                    //     'timemodified' => $timemodified,
+                    //     'filename' => $filename,
+                    //     'file' => $file,
+                    //     'previoussubmissions' => $previoussubmissions,
+                    //     'previoussubmission' => $previoussubmission,
+                    //     'moduledata' => $moduledata,
+                    //     'settings' => $settings,
+                    //     'moodlesubmission' => $moodlesubmission,
+                    //     'submissionfields' => $submissionfields,
+                    //     'typefield' => $typefield
+                    // ), true));
+                } catch (\Exception $e) {
+                    file_put_contents(__DIR__ . '/lib.log', print_r($e, true));
                 }
-            }
+                break;
 
-            // If applicable, check whether file type is accepted.
-            $acceptanyfiletype = (!empty($settings["plagiarism_allow_non_or_submissions"])) ? 1 : 0;
-            if (!$acceptanyfiletype && $submissiontype == 'file') {
+            case 'forum_post':
 
-                if (!plagiarism_drillbit_is_supported_file($filename)) {
-                    $errorcode = 4;
+            case 'quiz_answer':
+                if ($previoussubmissions = $DB->get_records_select(
+                    'plagiarism_drillbit_files',
+                    " cm = ? AND userid = ? AND identifier = ? ",
+                    array($cm->id, $author, $identifier),
+                    'id DESC',
+                    'id, cm, identifier, statuscode, attempt',
+                    0,
+                    1
+                )) {
+
+                    $previoussubmission = current($previoussubmissions);
+                    if ($previoussubmission->statuscode == "success") {
+                        return true;
+                    } else {
+                        $submissionid = $previoussubmission->id;
+                        $attempt = $previoussubmission->attempt;
+                        $this->reset_drillbit_submission($cm, $author, $identifier, $previoussubmission, $submissiontype);
+                    }
+                } else {
+                    $submissionid = $this->create_new_drillbit_submission($cm, $author, $identifier, $submissiontype);
                 }
+                break;
+        }
+
+        // Check file is less than maximum allowed size.
+        if ($submissiontype == 'file') {
+            if ($file->get_filesize() > PLAGIARISM_DRILLBIT_MAX_FILE_UPLOAD_SIZE) {
+                $errorcode = 2;
             }
         }
+
+        // If applicable, check whether file type is accepted.
+        $acceptanyfiletype = (!empty($settings["plagiarism_allow_non_or_submissions"])) ? 1 : 0;
+        if (!$acceptanyfiletype && $submissiontype == 'file') {
+
+            if (!plagiarism_drillbit_is_supported_file($filename)) {
+                $errorcode = 4;
+            }
+        }
+
         // Save submission as queued or errored if we have an errorcode.
         $statuscode = ($errorcode != 0) ? 'error' : 'queued';
         return $this->save_submission(
@@ -736,6 +1129,7 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
             $author,
             $submissionid,
             $identifier,
+            $plagcheck,
             $statuscode,
             $drillbitsubmissionid,
             $submitter,
@@ -777,6 +1171,62 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
 
         return $result;
     }
+    
+    
+     public function event_handler_db_update($eventdata)
+    {
+        global $DB, $CFG;
+        $result = true;
+
+
+        $sql = "DELETE FROM {assign_submission}
+        WHERE userid = :userid
+        AND id = :id
+        AND status = :statuss";
+
+        $params = array(
+            'id' => $eventdata['objectid'],
+            'userid' => $eventdata['userid'],
+            'statuss' => 'new'
+        );
+
+        $DB->execute($sql, $params);
+
+        return $result;
+    }
+
+
+    public function event_handler_drillbit($eventdata)
+    {
+        global $DB, $CFG;
+        $result = true;
+
+
+        if (!isset($eventdata["other"])) {
+            return $result;
+        }
+
+        switch ($eventdata["other"]["modulename"]) {
+            case "assign":
+                $result = $this->assign_events_handler($eventdata);
+                break;
+            case "quiz":
+                $result = $this->quiz_events_handler($eventdata);
+                break;
+            case "forum":
+                $result = $this->forum_events_handler($eventdata);
+                break;
+            case "workshop":
+                $result = $this->workshop_events_handler($eventdata);
+                break;
+            default:
+                $result = true;
+                mtrace("Invalid mod name");
+                break;
+        }
+
+        return $result;
+    }
 
     /**
      * Handles events for the assign module
@@ -787,11 +1237,10 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
     private function assign_events_handler($eventdata)
     {
         $result = true;
-        $pathnamehashes = @$eventdata["other"]["pathnamehashes"];
+        $pathnamehashes = $eventdata["other"]["pathnamehashes"];
         $userid = $eventdata["userid"];
 
         $cm = get_coursemodule_from_id($eventdata['other']['modulename'], $eventdata['contextinstanceid']);
-
 
         if (!$cm) {
             return true;
@@ -806,6 +1255,54 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                     $fileid = $this->queue_submission_to_drillbit($cm, $userid, $userid, $identifier, $submissiontype, $eventdata['objectid'], $eventdata["eventtype"]);
                 }
                 break;
+            case "content_uploaded":
+                    $submissiontype = "text_content";
+                    $identifier = sha1($eventdata['other']['content']);
+                    $fileid = $this->queue_submission_to_drillbit($cm, $userid, $userid, $identifier, $submissiontype, $eventdata['objectid'], $eventdata["eventtype"]);
+    
+                    break;
+            default:
+                $result = true;
+                break;
+        }
+
+        return $result;
+    }
+
+
+     /**
+     * Handles events for the assign module
+     * 
+     * @param array $eventdata
+     * @return bool
+     */
+    private function assign_events_handler_drillbit($eventdata)
+    {
+        $result = true;
+        $pathnamehashes = $eventdata["other"]["pathnamehashes"];
+        $userid = $eventdata["userid"];
+
+        $cm = get_coursemodule_from_id($eventdata['other']['modulename'], $eventdata['contextinstanceid']);
+
+        if (!$cm) {
+            return true;
+        }
+
+        $context = context_module::instance($cm->id);
+
+        switch ($eventdata["eventtype"]) {
+            case "file_uploaded":
+                $submissiontype = "file";
+                foreach ($pathnamehashes as $identifier) {
+                    $fileid = $this->queue_submission_to_drillbit($cm, $userid, $userid, $identifier, $submissiontype, $eventdata['objectid'], $eventdata["eventtype"]);
+                }
+                break;
+            case "content_uploaded":
+                    $submissiontype = "text_content";
+                    $identifier = sha1($eventdata['other']['content']);
+                    $fileid = $this->queue_submission_to_drillbit($cm, $userid, $userid, $identifier, $submissiontype, $eventdata['objectid'], $eventdata["eventtype"]);
+    
+                    break;
             default:
                 $result = true;
                 break;
@@ -829,8 +1326,6 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         $userid = $eventdata["userid"];
 
         $cm = get_coursemodule_from_instance($eventdata['other']['modulename'], $eventdata['other']['quizid']);
-
-
 
         // Remove the event if the course module no longer exists.
         if (!$cm) {
@@ -883,6 +1378,7 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                 $result = true;
                 break;
         }
+
         return $result;
     }
 
@@ -901,7 +1397,6 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         $userid = $eventdata["userid"];
 
         $cm = get_coursemodule_from_id($eventdata['other']['modulename'], $eventdata['contextinstanceid']);
-
 
         if (!$cm) {
             return true;
@@ -949,8 +1444,6 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
 
         $cm = get_coursemodule_from_id($eventdata['other']['modulename'], $eventdata['contextinstanceid']);
 
-
-
         if (!$cm) {
             return true;
         }
@@ -981,55 +1474,51 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
                 $result = true;
                 break;
         }
+
         return $result;
     }
 
     private function create_new_drillbit_submission($cm, $userid, $identifier, $submissiontype, $itemid = 0)
     {
         global $DB;
-        $updatedd = $DB->get_record('drillbit_plugin_config', ['cm' => $cm->id, 'name' => 'use_drillbit']);
-        if ($updatedd->value != 0) {
-            $plagiarismfile = new stdClass();
-            $plagiarismfile->cm = $cm->id;
-            $plagiarismfile->userid = $userid;
-            $plagiarismfile->identifier = $identifier;
-            $plagiarismfile->statuscode = "queued";
-            $plagiarismfile->similarityscore = null;
-            $plagiarismfile->attempt = 0;
-            $plagiarismfile->itemid = $itemid;
-            // $plagiarismfile->lastmodified = strtotime("now");
-            $plagiarismfile->submissiontype = $submissiontype;
 
-            if (!$fileid = $DB->insert_record('plagiarism_drillbit_files', $plagiarismfile)) {
-                plagiarism_drillbit_activitylog("Insert record failed (CM: " . $cm->id . ", User: " . $userid . ")", "PP_NEW_SUB");
-                $fileid = 0;
-            }
-        } else {
+        $plagiarismfile = new stdClass();
+        $plagiarismfile->cm = $cm->id;
+        $plagiarismfile->userid = $userid;
+        $plagiarismfile->identifier = $identifier;
+        $plagiarismfile->statuscode = "queued";
+        $plagiarismfile->similarityscore = null;
+        $plagiarismfile->attempt = 0;
+        $plagiarismfile->itemid = $itemid;
+        // $plagiarismfile->lastmodified = strtotime("now");
+        $plagiarismfile->submissiontype = $submissiontype;
+
+        if (!$fileid = $DB->insert_record('plagiarism_drillbit_files', $plagiarismfile)) {
+            plagiarism_drillbit_activitylog("Insert record failed (CM: " . $cm->id . ", User: " . $userid . ")", "PP_NEW_SUB");
             $fileid = 0;
         }
+
         return $fileid;
     }
 
     private function reset_drillbit_submission($cm, $userid, $identifier, $currentsubmission, $submissiontype)
     {
         global $DB;
-        $updatedd = $DB->get_record('drillbit_plugin_config', ['cm' => $cm->id, 'name' => 'use_drillbit']);
-        if ($updatedd->value != 0) {
-            $plagiarismfile = new stdClass();
-            $plagiarismfile->id = $currentsubmission->id;
-            $plagiarismfile->identifier = $identifier;
-            $plagiarismfile->statuscode = "pending";
-            $plagiarismfile->similarityscore = null;
-            if ($currentsubmission->statuscode != "error") {
-                $plagiarismfile->attempt = 1;
-            }
-            $plagiarismfile->submissiontype = $submissiontype;
-            $plagiarismfile->errormsg = null;
-            $plagiarismfile->errorcode = null;
 
-            if (!$DB->update_record('plagiarism_drillbit_files', $plagiarismfile)) {
-                plagiarism_drillbit_activitylog("Update record failed (CM: " . $cm->id . ", User: " . $userid . ")", "PP_REPLACE_SUB");
-            }
+        $plagiarismfile = new stdClass();
+        $plagiarismfile->id = $currentsubmission->id;
+        $plagiarismfile->identifier = $identifier;
+        $plagiarismfile->statuscode = "pending";
+        $plagiarismfile->similarityscore = null;
+        if ($currentsubmission->statuscode != "error") {
+            $plagiarismfile->attempt = 1;
+        }
+        $plagiarismfile->submissiontype = $submissiontype;
+        $plagiarismfile->errormsg = null;
+        $plagiarismfile->errorcode = null;
+
+        if (!$DB->update_record('plagiarism_drillbit_files', $plagiarismfile)) {
+            plagiarism_drillbit_activitylog("Update record failed (CM: " . $cm->id . ", User: " . $userid . ")", "PP_REPLACE_SUB");
         }
     }
 
@@ -1061,6 +1550,7 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         $userid,
         $submissionid,
         $identifier,
+        $plagcheck,
         $statuscode,
         $drillbitsubmissionid,
         $submitter,
@@ -1071,37 +1561,37 @@ class plagiarism_plugin_drillbit extends plagiarism_plugin
         $errormsg = null
     ) {
         global $DB;
-        $updatedd = $DB->get_record('drillbit_plugin_config', ['cm' => $cm->id, 'name' => 'use_drillbit']);
-        if ($updatedd->value != 0) {
-            $plagiarismfile = new stdClass();
-            if ($submissionid != 0) {
-                $plagiarismfile->id = $submissionid;
-            }
-            $plagiarismfile->cm = $cm->id;
-            $plagiarismfile->userid = $userid;
-            $plagiarismfile->identifier = $identifier;
-            $plagiarismfile->statuscode = $statuscode;
-            $plagiarismfile->similarityscore = null;
-            $plagiarismfile->submissionid = $drillbitsubmissionid;
-            $plagiarismfile->errorcode = (empty($errorcode)) ? null : $errorcode;
-            $plagiarismfile->errormsg = (empty($errormsg)) ? null : $errormsg;
-            $plagiarismfile->attempt = $attempt + 1;
-            $plagiarismfile->transmatch = 0;
-            $plagiarismfile->lastmodified = time();
-            $plagiarismfile->submissiontype = $submissiontype;
-            $plagiarismfile->itemid = $itemid;
-            $plagiarismfile->submitter = $submitter;
 
-            if ($submissionid != 0) {
-                if (!$DB->update_record('plagiarism_drillbit_files', $plagiarismfile)) {
-                    plagiarism_drillbit_activitylog("Update record failed (CM: " . $cm->id . ", User: " . $userid . ") - ", "PP_UPDATE_SUB_ERROR");
-                }
-            } else {
-                if (!$DB->insert_record('plagiarism_drillbit_files', $plagiarismfile)) {
-                    plagiarism_drillbit_activitylog("Insert record failed (CM: " . $cm->id . ", User: " . $userid . ") - ", "PP_INSERT_SUB_ERROR");
-                }
+        $plagiarismfile = new stdClass();
+        if ($submissionid != 0) {
+            $plagiarismfile->id = $submissionid;
+        }
+        $plagiarismfile->cm = $cm->id;
+        $plagiarismfile->userid = $userid;
+        $plagiarismfile->identifier = $identifier;
+        $plagiarismfile->plagcheck = $plagcheck;
+        $plagiarismfile->statuscode = $statuscode;
+        $plagiarismfile->similarityscore = null;
+        $plagiarismfile->submissionid = $drillbitsubmissionid;
+        $plagiarismfile->errorcode = (empty($errorcode)) ? null : $errorcode;
+        $plagiarismfile->errormsg = (empty($errormsg)) ? null : $errormsg;
+        $plagiarismfile->attempt = $attempt + 1;
+        $plagiarismfile->transmatch = 0;
+        $plagiarismfile->lastmodified = time();
+        $plagiarismfile->submissiontype = $submissiontype;
+        $plagiarismfile->itemid = $itemid;
+        $plagiarismfile->submitter = $submitter;
+
+        if ($submissionid != 0) {
+            if (!$DB->update_record('plagiarism_drillbit_files', $plagiarismfile)) {
+                plagiarism_drillbit_activitylog("Update record failed (CM: " . $cm->id . ", User: " . $userid . ") - ", "PP_UPDATE_SUB_ERROR");
+            }
+        } else {
+            if (!$DB->insert_record('plagiarism_drillbit_files', $plagiarismfile)) {
+                plagiarism_drillbit_activitylog("Insert record failed (CM: " . $cm->id . ", User: " . $userid . ") - ", "PP_INSERT_SUB_ERROR");
             }
         }
+
         return true;
     }
 
@@ -1171,40 +1661,38 @@ function plagiarism_drillbit_coursemodule_edit_post_actions($data, $course)
 
     if (is_drillbit_pulgin_enabled()) {
         if (get_allowed_modules_for_drillbit($data->modulename)) {
-            if (!empty($data)) {
-                $showstudreports = @$data->plagiarism_show_student_reports;
-                $exrefval = @$data->plagiarism_exclude_references;
-                $exquoteval = @$data->plagiarism_exclude_quotes;
-                $exsmallsourceval = @$data->plagiarism_exclude_smallsources;
-                $confighashref = @$data->coursemodule . '_plagiarism_exclude_references';
-                $confighashquote = @$data->coursemodule . '_plagiarism_exclude_quotes';
-                $confighashsmallsource = @$data->coursemodule . '_plagiarism_exclude_smallsources';
-                $configshowstudreports = @$data->coursemodule . '_plagiarism_show_student_reports';
-                plagiarism_drillbit_update_cm_post_actions(
-                    'plagiarism_show_student_reports',
-                    $showstudreports,
-                    $configshowstudreports,
-                    $data->coursemodule
-                );
-                plagiarism_drillbit_update_cm_post_actions(
-                    'plagiarism_exclude_references',
-                    $exrefval,
-                    $confighashref,
-                    $data->coursemodule
-                );
-                plagiarism_drillbit_update_cm_post_actions(
-                    'plagiarism_exclude_quotes',
-                    $exquoteval,
-                    $confighashquote,
-                    $data->coursemodule
-                );
-                plagiarism_drillbit_update_cm_post_actions(
-                    'plagiarism_exclude_smallsources',
-                    $exsmallsourceval,
-                    $confighashsmallsource,
-                    $data->coursemodule
-                );
-            }
+            $showstudreports = $data->plagiarism_show_student_reports;
+            $exrefval = $data->plagiarism_exclude_references;
+            $exquoteval = $data->plagiarism_exclude_quotes;
+            $exsmallsourceval = $data->plagiarism_exclude_smallsources;
+            $confighashref = $data->coursemodule . '_plagiarism_exclude_references';
+            $confighashquote = $data->coursemodule . '_plagiarism_exclude_quotes';
+            $confighashsmallsource = $data->coursemodule . '_plagiarism_exclude_smallsources';
+            $configshowstudreports = $data->coursemodule . '_plagiarism_show_student_reports';
+            plagiarism_drillbit_update_cm_post_actions(
+                'plagiarism_show_student_reports',
+                $showstudreports,
+                $configshowstudreports,
+                $data->coursemodule
+            );
+            plagiarism_drillbit_update_cm_post_actions(
+                'plagiarism_exclude_references',
+                $exrefval,
+                $confighashref,
+                $data->coursemodule
+            );
+            plagiarism_drillbit_update_cm_post_actions(
+                'plagiarism_exclude_quotes',
+                $exquoteval,
+                $confighashquote,
+                $data->coursemodule
+            );
+            plagiarism_drillbit_update_cm_post_actions(
+                'plagiarism_exclude_smallsources',
+                $exsmallsourceval,
+                $confighashsmallsource,
+                $data->coursemodule
+            );
         }
     }
 
@@ -1245,20 +1733,14 @@ function plagiarism_drillbit_update_cm_post_actions($name, $value, $hash, $cm)
         $toupdate = new stdClass();
         $toupdate->id = $update->id;
         $toupdate->value = $value;
-        if ($value != 0) {
-            $DB->update_record("drillbit_plugin_config", $toupdate);
-        }
+        $DB->update_record("drillbit_plugin_config", $toupdate);
     } else {
-        if (!empty($cm) && !empty($value)) {
-            $insert = new stdClass();
-            $insert->cm = $cm;
-            $insert->name = $name;
-            $insert->value = $value;
-            $insert->config_hash = $hash;
-            if ($value != 0) {
-                $DB->insert_record('drillbit_plugin_config', $insert);
-            }
-        }
+        $insert = new stdClass();
+        $insert->cm = $cm;
+        $insert->name = $name;
+        $insert->value = $value;
+        $insert->config_hash = $hash;
+        $DB->insert_record('drillbit_plugin_config', $insert);
     }
 }
 
@@ -1267,7 +1749,6 @@ function plagiarism_drillbit_send_queued_submissions()
 {
 
     $resultcode = plagiarism_drillbit_update_expired_jwt_token();
-
     if ($resultcode) {
         global $CFG, $DB;
 
@@ -1288,174 +1769,171 @@ function plagiarism_drillbit_send_queued_submissions()
             $errorcode = 0;
             $cm = get_coursemodule_from_id('', $queueditem->cm);
             $settings = plagiarism_drillbit_get_cm_settings($queueditem->cm);
-            $updatedd = $DB->get_record('drillbit_plugin_config', ['cm' => $cm->id, 'name' => 'use_drillbit']);
-            //$insert->value 
-            if ($updatedd->value != 0) {
-                // Don't proceed if the course module no longer exists.
-                if (empty($cm)) {
-                    mtrace('File module not found for submission. Identifier: ' . $queueditem->id);
-                    $errorcode = 9;
-                    $DB->update_record('plagiarism_drillbit_files', array(
-                        'id' => $queueditem->id,
-                        'statuscode' => 'error',
-                        'lastmodified' => time(),
-                    ));
-                    continue;
-                }
 
-                $modconfig = plagiarism_drillbit_get_cm_settings($queueditem->cm);
-
-                switch ($queueditem->submissiontype) {
-                    case 'file':
-                        $fs = get_file_storage();
-                        $file = $fs->get_file_by_hash($queueditem->identifier);
-                        if (!$file) {
-                            mtrace('File not found for submission. Identifier: ' . $queueditem->id);
-                            $errorcode = 9;
-                            break;
-                        }
-
-                        $title = $file->get_filename();
-                        $filename = $file->get_filename();
-                        $mime = $file->get_mimetype();
-
-                        try {
-                            $textcontent = $file->get_content();
-                        } catch (Exception $e) {
-                            mtrace($e);
-                            mtrace('File content not found on submission. Identifier: ' . $queueditem->identifier);
-                            $errorcode = 9;
-                            mark_errored_submission($queueditem, 9, "File content not found on submission");
-                        }
-                        break;
-                    case 'text_content':
-                        $mime = "text/plain";
-                        switch ($cm->modname) {
-                            case 'assign':
-                                $moodlesubmission = $DB->get_record('assign_submission', array(
-                                    'assignment' => $cm->instance,
-                                    'userid' => $queueditem->userid, 'id' => $queueditem->itemid
-                                ), 'id');
-                                $moodletextsubmission = $DB->get_record(
-                                    'assignsubmission_onlinetext',
-                                    array('submission' => $moodlesubmission->id),
-                                    'onlinetext'
-                                );
-                                $textcontent = $moodletextsubmission->onlinetext;
-                                break;
-                            case 'workshop':
-                                $moodlesubmission = $DB->get_record(
-                                    'workshop_submissions',
-                                    array('id' => $queueditem->itemid),
-                                    'content'
-                                );
-                                $textcontent = $moodlesubmission->content;
-                                break;
-                        }
-
-                        $title = 'onlinetext_' . $queueditem->userid . "_" . $cm->id . "_" . $cm->instance . '.txt';
-                        $filename = $title;
-                        $textcontent = html_to_text($textcontent);
-                        break;
-
-                    case 'forum_post':
-                        if (!is_null($queueditem->submissionid)) {
-                            $apimethod = ($settings["plagiarism_report_gen"] == 0) ? "createSubmission" : "replaceSubmission";
-                        }
-
-                        $forumpost = $DB->get_record_select('forum_posts', " userid = ? AND id = ? ", array($queueditem->userid, $queueditem->itemid));
-
-                        if ($forumpost) {
-                            $textcontent = strip_tags($forumpost->message);
-                            $title = 'forumpost_' . $queueditem->userid . "_" . $cm->id . "_" . $cm->instance . "_" . $queueditem->itemid . '.txt';
-                            $filename = $title;
-                        } else {
-                            $errorcode = 9;
-                        }
-
-                        break;
-
-                    case 'quiz_answer':
-                        $mime = "text/plain";
-                        require_once($CFG->dirroot . '/mod/quiz/locallib.php');
-                        try {
-                            $attempt = quiz_attempt::create($queueditem->itemid);
-                        } catch (Exception $e) {
-                            mtrace($e->getMessage());
-                            mark_errored_submission($queueditem, 9, "Quiz attempt not found");
-                            break;
-                        }
-                        foreach ($attempt->get_slots() as $slot) {
-                            $qa = $attempt->get_question_attempt($slot);
-                            if ($queueditem->identifier == sha1($qa->get_response_summary() . $slot)) {
-                                $textcontent = $qa->get_response_summary();
-                                break;
-                            }
-                        }
-
-                        if (!empty($textcontent)) {
-                            $textcontent = strip_tags($textcontent);
-                            $title = 'quizanswer_' . $user->id . "_" . $cm->id . "_" . $cm->instance . "_" . $queueditem->itemid . '.txt';
-                            $filename = $title;
-                        } else {
-                            mark_errored_submission($queueditem, 9, "Quiz answer not found");
-                        }
-
-                        break;
-                    default:
-                        mtrace('Unknown submission type. Identifier: ' . $queueditem->id);
-                        break;
-                }
-
-                $tempfile = null;
-                try {
-                    $tempfile = plagiarism_drillbit_tempfile($filename, $filename);
-                    $fh = fopen($tempfile, "w");
-                    fwrite($fh, $textcontent);
-                    fclose($fh);
-                } catch (Exception $e) {
-                    mtrace($e);
-                    mtrace('File content not found on submission. Identifier: ' . $queueditem->identifier);
-                }
-
-                if (!$tempfile) {
-                    continue;
-                }
-
-                $postdata = array();
-                $postdata["authorName"] = get_email_by_user_id($queueditem->userid);
-                $postdata["title"] = $cm->name;
-                //$postdata["assignment_id"] = $folderid;
-                $postdata["documentType"] = "thesis";
-
-                if (isset($modconfig["plagiarism_exclude_references"])) {
-                    $postdata["ex_ref"] = $modconfig["plagiarism_exclude_references"] == "1" ? "yes" : "no";
-                } else {
-                    $postdata["ex_ref"] = $pluginsettings["plagiarism_exclude_references"] == "1" ? "yes" : "no";
-                }
-
-                if (isset($modconfig["plagiarism_exclude_quotes"])) {
-                    $postdata["ex_qts"] = $modconfig["plagiarism_exclude_quotes"] == "1" ? "yes" : "no";
-                } else {
-                    $postdata["ex_qts"] = $pluginsettings["plagiarism_exclude_quotes"] == "1" ? "yes" : "no";
-                }
-
-                if (isset($modconfig["plagiarism_exclude_smallsources"])) {
-                    $postdata["ex_ss"] = $modconfig["plagiarism_exclude_smallsources"] == "1" ? "yes" : "no";
-                } else {
-                    $postdata["ex_ss"] = $pluginsettings["plagiarism_exclude_smallsources"] == "1" ? "yes" : "no";
-                }
-
-                $postdata["file"] = curl_file_create($tempfile, $mime, $filename);
-                $headers = plagiarism_drillbit_get_file_headers($jwt);
-                $url = "https://s1.drillbitplagiarismcheck.com/files/moodle/upload";
-                $request = plagiarism_drillbit_call_external_api("POST", $url, $postdata, $headers);
-                if ($tempfile) {
-                    unlink($tempfile);
-                }
-
-                plagiarism_drillbit_update_submissions($request, $queueditem->id);
+            // Don't proceed if the course module no longer exists.
+            if (empty($cm)) {
+                mtrace('File module not found for submission. Identifier: ' . $queueditem->id);
+                $errorcode = 9;
+                $DB->update_record('plagiarism_drillbit_files', array(
+                    'id' => $queueditem->id,
+                    'statuscode' => 'error',
+                    'lastmodified' => time(),
+                ));
+                continue;
             }
+
+            $modconfig = plagiarism_drillbit_get_cm_settings($queueditem->cm);
+
+            switch ($queueditem->submissiontype) {
+                case 'file':
+                    $fs = get_file_storage();
+                    $file = $fs->get_file_by_hash($queueditem->identifier);
+                    if (!$file) {
+                        mtrace('File not found for submission. Identifier: ' . $queueditem->id);
+                        $errorcode = 9;
+                        break;
+                    }
+
+                    $title = $file->get_filename();
+                    $filename = $file->get_filename();
+                    $mime = $file->get_mimetype();
+
+                    try {
+                        $textcontent = $file->get_content();
+                    } catch (Exception $e) {
+                        mtrace($e);
+                        mtrace('File content not found on submission. Identifier: ' . $queueditem->identifier);
+                        $errorcode = 9;
+                        mark_errored_submission($queueditem, 9, "File content not found on submission");
+                    }
+                    break;
+                case 'text_content':
+                    $mime = "text/plain";
+                    switch ($cm->modname) {
+                        case 'assign':
+                            $moodlesubmission = $DB->get_record('assign_submission', array(
+                                'assignment' => $cm->instance,
+                                'userid' => $queueditem->userid, 'id' => $queueditem->itemid
+                            ), 'id');
+                            $moodletextsubmission = $DB->get_record(
+                                'assignsubmission_onlinetext',
+                                array('submission' => $moodlesubmission->id),
+                                'onlinetext'
+                            );
+                            $textcontent = $moodletextsubmission->onlinetext;
+                            break;
+                        case 'workshop':
+                            $moodlesubmission = $DB->get_record(
+                                'workshop_submissions',
+                                array('id' => $queueditem->itemid),
+                                'content'
+                            );
+                            $textcontent = $moodlesubmission->content;
+                            break;
+                    }
+
+                    $title = 'onlinetext_' . $queueditem->userid . "_" . $cm->id . "_" . $cm->instance . '.txt';
+                    $filename = $title;
+                    $textcontent = html_to_text($textcontent);
+                    break;
+
+                case 'forum_post':
+                    if (!is_null($queueditem->submissionid)) {
+                        $apimethod = ($settings["plagiarism_report_gen"] == 0) ? "createSubmission" : "replaceSubmission";
+                    }
+
+                    $forumpost = $DB->get_record_select('forum_posts', " userid = ? AND id = ? ", array($queueditem->userid, $queueditem->itemid));
+
+                    if ($forumpost) {
+                        $textcontent = strip_tags($forumpost->message);
+                        $title = 'forumpost_' . $queueditem->userid . "_" . $cm->id . "_" . $cm->instance . "_" . $queueditem->itemid . '.txt';
+                        $filename = $title;
+                    } else {
+                        $errorcode = 9;
+                    }
+
+                    break;
+
+                case 'quiz_answer':
+                    $mime = "text/plain";
+                    require_once($CFG->dirroot . '/mod/quiz/locallib.php');
+                    try {
+                        $attempt = quiz_attempt::create($queueditem->itemid);
+                    } catch (Exception $e) {
+                        mtrace($e->getMessage());
+                        mark_errored_submission($queueditem, 9, "Quiz attempt not found");
+                        break;
+                    }
+                    foreach ($attempt->get_slots() as $slot) {
+                        $qa = $attempt->get_question_attempt($slot);
+                        if ($queueditem->identifier == sha1($qa->get_response_summary() . $slot)) {
+                            $textcontent = $qa->get_response_summary();
+                            break;
+                        }
+                    }
+
+                    if (!empty($textcontent)) {
+                        $textcontent = strip_tags($textcontent);
+                        $title = 'quizanswer_' . $user->id . "_" . $cm->id . "_" . $cm->instance . "_" . $queueditem->itemid . '.txt';
+                        $filename = $title;
+                    } else {
+                        mark_errored_submission($queueditem, 9, "Quiz answer not found");
+                    }
+
+                    break;
+                default:
+                    mtrace('Unknown submission type. Identifier: ' . $queueditem->id);
+                    break;
+            }
+
+            $tempfile = null;
+            try {
+                $tempfile = plagiarism_drillbit_tempfile($filename, $filename);
+                $fh = fopen($tempfile, "w");
+                fwrite($fh, $textcontent);
+                fclose($fh);
+            } catch (Exception $e) {
+                mtrace($e);
+                mtrace('File content not found on submission. Identifier: ' . $queueditem->identifier);
+            }
+
+            if (!$tempfile) {
+                continue;
+            }
+
+            $postdata = array();
+            $postdata["authorName"] = get_email_by_user_id($queueditem->userid);
+            $postdata["title"] = $cm->name;
+            //$postdata["assignment_id"] = $folderid;
+            $postdata["documentType"] = "thesis";
+
+            if (isset($modconfig["plagiarism_exclude_references"])) {
+                $postdata["ex_ref"] = $modconfig["plagiarism_exclude_references"] == "1" ? "yes" : "no";
+            } else {
+                $postdata["ex_ref"] = $pluginsettings["plagiarism_exclude_references"] == "1" ? "yes" : "no";
+            }
+
+            if (isset($modconfig["plagiarism_exclude_quotes"])) {
+                $postdata["ex_qts"] = $modconfig["plagiarism_exclude_quotes"] == "1" ? "yes" : "no";
+            } else {
+                $postdata["ex_qts"] = $pluginsettings["plagiarism_exclude_quotes"] == "1" ? "yes" : "no";
+            }
+
+            if (isset($modconfig["plagiarism_exclude_smallsources"])) {
+                $postdata["ex_ss"] = $modconfig["plagiarism_exclude_smallsources"] == "1" ? "yes" : "no";
+            } else {
+                $postdata["ex_ss"] = $pluginsettings["plagiarism_exclude_smallsources"] == "1" ? "yes" : "no";
+            }
+
+            $postdata["file"] = curl_file_create($tempfile, $mime, $filename);
+            $headers = plagiarism_drillbit_get_file_headers($jwt);
+            $url = "https://s1.drillbitplagiarismcheck.com/files/moodle/upload";
+            $request = plagiarism_drillbit_call_external_api("POST", $url, $postdata, $headers);
+            if ($tempfile) {
+                unlink($tempfile);
+            }
+
+            plagiarism_drillbit_update_submissions($request, $queueditem->id);
         }
     } else {
         mtrace("Unable to authenticate against Drillbit API. Please contact Drillbit Support");
@@ -1487,7 +1965,7 @@ function plagiarism_drillbit_update_reports()
 {
     global $DB;
     $resultcode = plagiarism_drillbit_update_expired_jwt_token();
-    var_dump($resultcode);
+    // var_dump($resultcode);
     if ($resultcode) {
         $queueditems = $DB->get_records_select(
             "plagiarism_drillbit_files",
@@ -1514,7 +1992,7 @@ function plagiarism_drillbit_update_reports()
             $headers = array("Authorization: Bearer $jwt", "Accept: application/json");
 
             $request = plagiarism_drillbit_call_external_api("GET", $callback, false, $headers);
-            var_dump($jwt, $headers, $callback, $request);
+            // var_dump($jwt, $headers, $callback, $request);
             plagiarism_drillbit_update_submissions($request, $queueditem->id);
         }
     } else {
@@ -1588,6 +2066,8 @@ function plagiarism_drillbit_update_expired_jwt_token()
     $apikey = "";
     $folderid = "";
     $existingtoken = plagiarism_drillbit_get_existing_jwt_token();
+    
+
     $deserializedtoken = null;
     if (!empty($existingtoken)) {
         try {
@@ -1644,19 +2124,19 @@ function plagiarism_drillbit_get_login_token($email, $pass, $apikey)
     $loginparams["password"] = $pass;
     $loginparams["api_key"] = $apikey;
     //$loginparams["submissions_key"] = $folderid;
-    if (!empty($loginparams)) {
-        $jsonrequest = json_encode($loginparams);
 
-        $url = "https://s1.drillbitplagiarismcheck.com/authentication/authenticate/moodle";
+    $jsonrequest = json_encode($loginparams);
 
-        $request = plagiarism_drillbit_call_external_api("POST", $url, $jsonrequest);
+    $url = "https://s1.drillbitplagiarismcheck.com/authentication/authenticate/moodle";
 
-        $response = json_decode($request);
+    $request = plagiarism_drillbit_call_external_api("POST", $url, $jsonrequest);
 
-        if (isset($response->token)) {
-            return $response->token;
-        }
+    $response = json_decode($request);
+
+    if (isset($response->token)) {
+        return $response->token;
     }
+
     return null;
 }
 
@@ -1671,6 +2151,7 @@ function plagiarism_drillbit_call_external_api($method, $url, $data = false, $he
     $curl->setHeader($headers);
     $curl->setopt($curloptions);
 
+    $jwt = plagiarism_drillbit_get_existing_jwt_token();
 
     $result = null;
     switch ($method) {
@@ -1680,6 +2161,12 @@ function plagiarism_drillbit_call_external_api($method, $url, $data = false, $he
         case "PUT":
             $curloptions['CURLOPT_PUT'] = 1;
             break;
+        case "GET":
+            $headers = array(
+                "Authorization: Bearer $jwt"
+            );
+            $curl->setHeader($headers);
+            $result = $curl->get($url);
         default:
             $result = $curl->get($url, $data);
     }
@@ -1787,8 +2274,6 @@ function plagiarism_drillbit_update_submissions($response, $fileid)
 {
     global $DB;
     $responseobj = json_decode($response, true);
-    //var_dump($response);
-    file_put_contents(__DIR__ . '/update_report.log', print_r($responseobj), FILE_APPEND);
     if (isset($responseobj["submissions"])) {
         $responseobj = $responseobj["submissions"];
     }
@@ -1813,7 +2298,7 @@ function plagiarism_drillbit_update_submissions($response, $fileid)
         $plagiarismfile->lastmodified = strtotime("now");
         $plagiarismfile->dkey = $responseobj["d_key"];
         $plagiarismfile->statuscode = "submitted";
-
+        $plagiarismfile->aiscore = $responseobj["ai"];
         if ($responseobj["percent"] != "--") {
             $plagiarismfile->statuscode = "completed";
             $plagiarismfile->similarityscore = $responseobj["percent"];
@@ -1832,7 +2317,12 @@ function get_report_download_uri($paperid, $dkey)
 {
     return "https://s1.drillbitplagiarismcheck.com/extreme/moodle/submission/$paperid/$dkey/download";
 }
-/*
+
+function get_analysis_page_download_uri($paperid)
+{
+    return "https://s1.drillbitplagiarismcheck.com/extreme/moodle/submission/$paperid/analysis";
+}
+
 function dd($obj, $json = false)
 {
     if (!$json) {
@@ -1842,7 +2332,7 @@ function dd($obj, $json = false)
     print_r($obj);
     exit(0);
 }
-*/
+
 /**
  * Log activity / errors
  *

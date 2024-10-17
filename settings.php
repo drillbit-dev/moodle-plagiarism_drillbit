@@ -115,8 +115,6 @@ $settingsform->display();
                 if (data["token"]) {
                     var token = data["token"];
                     var html = "<b>" + <?php echo json_encode(get_string('connsuccess', 'plagiarism_drillbit')); ?>;
-                    html += "</b><br/><p>Access Token => " + token + "</p>";
-
                     $('#api_conn_result').html(html);
                 } else if (data["status"] && data["status"] == 400) {
                     var html = "<b>" + <?php echo json_encode(get_string('connfail', 'plagiarism_drillbit')); ?>;
